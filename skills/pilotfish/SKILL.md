@@ -62,7 +62,7 @@ pilotfish agents --json --without claude      # lo mismo, excluyendo lo que se h
 
 ### Cómo lanzar un trabajador
 
-Usa la orquestación de Orca (skill `orchestration`; comando `orca`). Una ejecución (`run`) por flujo, una tarea por encargo:
+Usa la orquestación de Orca (comando `orca`). Antes del primer encargo del flujo, carga la skill `orchestration` de Orca (`/orchestration`): es la referencia de los comandos y sus opciones. Si su sintaxis difiere de la que aparece aquí, sigue la de la skill; lo que no cambia es el reparto de este apartado. Una ejecución (`run`) por flujo, una tarea por encargo:
 
 1. Crea la ejecución al empezar el desarrollo (`orca orchestration run-create --objective "<flujo> NNN-nombre"`) y, si vuelves a ella, retómala con `orca orchestration run-use`.
 2. Crea la tarea con el encargo completo: el contenido íntegro de `papeles/<papel>.md` seguido de lo concreto (rama, worktree, rutas de `spec.md`, `plan.md` y `tasks.md`, tareas o hallazgos, base de comparación `origin/main`) y estas dos líneas: «Si el worktree no está preparado (faltan dependencias o `.env.worktree`), ejecuta antes `mise trust && mise install && mise run setup`» e «Indica en tu informe el commit que has evaluado o el último que has hecho (`git rev-parse --short HEAD`)».
