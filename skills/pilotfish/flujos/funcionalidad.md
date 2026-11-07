@@ -23,7 +23,7 @@ git fetch origin --prune
 test "$(git rev-parse --git-dir)" = "$(git rev-parse --git-common-dir)" && echo principal || echo worktree
 ls docs/specs/
 git branch -a --list '*feat/[0-9][0-9][0-9]-*'
-taller agentes --json
+pilotfish agents --json
 ```
 
 - `NNN`: siguiente número de tres cifras tras el mayor entre `docs/specs/` y las ramas `feat/NNN-*` locales y remotas, para que dos tareas en paralelo no repitan número. `nombre-corto`: 2-4 palabras en kebab-case.
@@ -57,11 +57,11 @@ Si surgen dudas sobre la especificación, pregúntalas y actualiza `spec.md` ant
 git add docs/ && git commit -m "docs(specs): especificación y plan de NNN-nombre-corto"
 ```
 
-Si `planificar` y `coordinar` usan modelos distintos, sugiere ahora al usuario el cambio de modelo.
+Si `plan` y `coordinate` usan modelos distintos, sugiere ahora al usuario el cambio de modelo.
 
 ## 4. Desarrollo
 
-Lanza el `desarrollador` (`--worktree current`) por bloques de hasta 5 tareas. Encargo, además de su papel:
+Lanza el `developer` (`--worktree current`) por bloques de hasta 5 tareas. Encargo, además de su papel:
 
 > Rama `feat/NNN-nombre-corto`, en este worktree. Implementa las tareas T1-T5 de `docs/specs/NNN-nombre-corto/tasks.md` según `spec.md` y `plan.md`. Un commit por tarea con su test.
 
@@ -74,9 +74,9 @@ Elige los auditores con la especificación, el plan y el diff (`git diff --stat 
 | Papel | Cuándo |
 |---|---|
 | `qa` | Siempre |
-| `revisor` | Siempre en modo completo |
-| `seguridad` | Si toca autenticación, sesiones, permisos, datos personales, pagos, secretos o configuración, dependencias nuevas, subida de archivos, servicios externos, o entradas de usuario nuevas que llegan a base de datos, HTML, shell o archivos. En caso de duda, lánzalo |
-| `cazabugs` | Si hay reglas de negocio con estados, cálculos (importes, fechas, zonas horarias), concurrencia o tareas asíncronas, integraciones externas, migraciones de datos o parseo de formatos |
+| `reviewer` | Siempre en modo completo |
+| `security` | Si toca autenticación, sesiones, permisos, datos personales, pagos, secretos o configuración, dependencias nuevas, subida de archivos, servicios externos, o entradas de usuario nuevas que llegan a base de datos, HTML, shell o archivos. En caso de duda, lánzalo |
+| `bug_hunter` | Si hay reglas de negocio con estados, cálculos (importes, fechas, zonas horarias), concurrencia o tareas asíncronas, integraciones externas, migraciones de datos o parseo de formatos |
 
 Di al usuario en una línea cuáles van y por qué los que no; si pide alguno más, añádelo.
 
@@ -94,7 +94,7 @@ Consolida los informes: une duplicados, conserva el texto completo de cada halla
 - MEDIO: se corrigen salvo que sean muchos o costosos; en ese caso pregunta al usuario cuáles aplazar.
 - BAJO: van a la PR como pendientes.
 
-Lanza el `desarrollador` (`--worktree current`) con todos los hallazgos a corregir en un solo encargo, completos. Si discute un hallazgo, decide tú cuando sea evidente y pregunta al usuario cuando no.
+Lanza el `developer` (`--worktree current`) con todos los hallazgos a corregir en un solo encargo, completos. Si discute un hallazgo, decide tú cuando sea evidente y pregunta al usuario cuando no.
 
 Verificación:
 

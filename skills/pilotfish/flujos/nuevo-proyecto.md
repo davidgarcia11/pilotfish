@@ -77,14 +77,14 @@ Si el scaffold hizo su propio commit, borra `.git` y vuelve a `git init -b main`
 ### 3. Base del estándar
 
 ```bash
-taller base --forja github   # o gitlab; --servicios y --runbook si el plan los incluye
+pilotfish scaffold --forge github   # o gitlab; --services y --runbook si el plan los incluye
 ```
 
-Copia sin sobrescribir: hooks de git (secretos, formato de commits y firmas de IA), `scripts/comprobar-commits.sh`, `cliff.toml`, CI, plantilla de PR/MR, `docs/`, `AGENTS.md`, `CLAUDE.md`, `.claude/` (permisos y hook que bloquea commits en `main`), `.worktreeinclude`, y con `--servicios` el `compose.yaml` y `scripts/entorno-worktree.sh`. Configura `core.hooksPath`, la exclusión local y el `.gitignore`. Lee su salida y resuelve lo que indique.
+Copia sin sobrescribir: hooks de git (secretos, formato de commits y firmas de IA), `scripts/comprobar-commits.sh`, `cliff.toml`, CI, plantilla de PR/MR, `docs/`, `AGENTS.md`, `CLAUDE.md`, `.claude/` (permisos y hook que bloquea commits en `main`), `.worktreeinclude`, y con `--services` el `compose.yaml` y `scripts/entorno-worktree.sh`. Configura `core.hooksPath`, la exclusión local y el `.gitignore`. Lee su salida y resuelve lo que indique.
 
 ### 4. Rellenar con el plan aprobado
 
-- `mise.toml`: las tareas de `$(taller ruta)/plantillas/tareas/<stack>.toml` (no las copia `taller base`: adáptalas al proyecto), más `version.toml` y, con servicios, `servicios.toml`. `check` incluye lint, formato, tipos, tests, build, `gitleaks` y `osv-scanner`. Con servicios, `setup` termina con `mise run entorno`.
+- `mise.toml`: las tareas de `$(pilotfish path)/plantillas/tareas/<stack>.toml` (no las copia `pilotfish scaffold`: adáptalas al proyecto), más `version.toml` y, con servicios, `servicios.toml`. `check` incluye lint, formato, tipos, tests, build, `gitleaks` y `osv-scanner`. Con servicios, `setup` termina con `mise run entorno`.
 - Herramientas de lint, formato y test del stack como dependencias de desarrollo, con su configuración.
 - **Con base de datos:** la app usa `DATABASE_URL` y los tests `TEST_DATABASE_URL`, nunca la de desarrollo, con las migraciones aplicadas antes de ejecutarlos. El servidor de desarrollo usa `PORT` y los e2e `E2E_PORT`. Todas salen de `.env.worktree`, que mise carga después de `.env`. En CI, el servicio de base de datos hace de base de tests. En `.env` usa una contraseña de base de datos sin caracteres especiales de URL.
 - Con API: OpenAPI generado desde el código, nunca escrito a mano, exportado con `mise run api-docs`; `check` falla si no coincide.

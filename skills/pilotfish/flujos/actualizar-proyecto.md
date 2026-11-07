@@ -1,6 +1,6 @@
 # Flujo: actualizar proyecto
 
-Lleva a un proyecto que ya sigue el estándar las novedades de las plantillas del taller. Solo añades lo que falta: nunca borras, nunca sustituyes un archivo entero y nunca cambias una línea que el proyecto haya adaptado sin enseñársela al usuario.
+Lleva a un proyecto que ya sigue el estándar las novedades de las plantillas de Pilotfish. Solo añades lo que falta: nunca borras, nunca sustituyes un archivo entero y nunca cambias una línea que el proyecto haya adaptado sin enseñársela al usuario.
 
 Mejor desde la copia principal del proyecto, que es de donde copian los worktrees nuevos.
 
@@ -18,10 +18,10 @@ Si sale `sin-estandar`, el proyecto nunca se adaptó: sigue `flujos/adaptar-proy
 
 ```bash
 ref="$(mktemp -d)" && git -C "$ref" init -q
-taller base --forja <github|gitlab> [--servicios] [--runbook] --dir "$ref"
+pilotfish scaffold --forge <github|gitlab> [--services] [--runbook] --dir "$ref"
 ```
 
-`--servicios` si el proyecto tiene `compose.yaml`; `--runbook` si tiene `docs/RUNBOOK.md`. Las tareas de mise de referencia están en `$(taller ruta)/plantillas/tareas/`.
+`--services` si el proyecto tiene `compose.yaml`; `--runbook` si tiene `docs/RUNBOOK.md`. Las tareas de mise de referencia están en `$(pilotfish path)/plantillas/tareas/`.
 
 ## 3. Comparar
 

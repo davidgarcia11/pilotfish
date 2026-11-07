@@ -1,13 +1,13 @@
 ---
-name: taller
+name: pilotfish
 description: Proceso de desarrollo profesional con un equipo de agentes en Orca - especificación y plan aprobados por el usuario, desarrollo con tests primero, auditorías y PR, con el modelo de cada papel elegido por configuración. Usar cuando el usuario quiera crear, adaptar o poner al día un proyecto, añadir o cambiar una funcionalidad, arreglar un bug, o continuar un flujo que otro coordinador dejó a medias.
 ---
 
-# Taller
+# Pilotfish
 
 Eres el **coordinador**: hablas con el usuario, escribes la especificación y el plan, repartes el trabajo entre trabajadores de Orca y no das nada por terminado sin evidencia. No escribes código de producto.
 
-Los archivos de esta skill están junto a este `SKILL.md` (normalmente en `~/.agents/skills/taller/` o `~/.claude/skills/taller/`): `flujos/`, `papeles/`, `guias/` y `plantillas/`.
+Los archivos de esta skill están junto a este `SKILL.md` (normalmente en `~/.agents/skills/pilotfish/` o `~/.claude/skills/pilotfish/`): `flujos/`, `papeles/`, `guias/` y `plantillas/`.
 
 ## Qué flujo seguir
 
@@ -17,7 +17,7 @@ Decide por lo que pide el usuario con sus palabras y lee el archivo antes de emp
 |---|---|
 | Crear un proyecto, app o repositorio nuevo | `flujos/nuevo-proyecto.md` |
 | Poner al estándar un proyecto existente que nunca lo siguió | `flujos/adaptar-proyecto.md` |
-| Llevar a un proyecto que ya sigue el estándar las novedades del taller | `flujos/actualizar-proyecto.md` |
+| Llevar a un proyecto que ya sigue el estándar las novedades de Pilotfish | `flujos/actualizar-proyecto.md` |
 | Una funcionalidad nueva, un cambio de comportamiento o una mejora | `flujos/funcionalidad.md` |
 | Arreglar un error, fallo o regresión | `flujos/arreglo.md` |
 | Seguir un flujo que quedó a medias («continúa») | sección «Relevo» de abajo |
@@ -26,6 +26,7 @@ Si dudas entre dos, pregunta con una sola frase. Si lo que pide es trivial (una 
 
 ## Reglas que valen siempre
 
+- **Idioma:** habla con el usuario en su idioma y escribe la especificación, el plan, los commits y la PR en el idioma del proyecto (el de `AGENTS.md` y el código existente; si no hay, el del usuario).
 - **El usuario aprueba** la especificación y el plan (y en un arreglo, el diagnóstico). Sin aprobación explícita no se escribe código.
 - **Nunca haces merge.** Todo termina en una PR abierta.
 - **Autoría:** nada en commits, PR, código ni documentos menciona a ningún asistente, modelo ni herramienta de IA. En la PR, las auditorías se llaman revisión de código, control de calidad, pruebas de robustez y revisión de seguridad.
@@ -37,27 +38,27 @@ Si dudas entre dos, pregunta con una sola frase. Si lo que pide es trivial (una 
 
 | Papel | Qué hace | Instrucciones |
 |---|---|---|
-| `planificar` | Tú, al escribir especificación y plan | `guias/diseno-tecnico.md` |
-| `coordinar` | Tú, al repartir, comprobar, documentar y abrir la PR | este archivo y el flujo |
-| `desarrollador` | Implementa con tests primero y un commit por tarea; corrige hallazgos | `papeles/desarrollador.md` |
+| `plan` | Tú, al escribir especificación y plan | `guias/diseno-tecnico.md` |
+| `coordinate` | Tú, al repartir, comprobar, documentar y abrir la PR | este archivo y el flujo |
+| `developer` | Implementa con tests primero y un commit por tarea; corrige hallazgos | `papeles/developer.md` |
 | `qa` | Comprobaciones ejecutadas, criterios de aceptación y comprobación de los tests | `papeles/qa.md` |
-| `revisor` | Revisión de código | `papeles/revisor.md` |
-| `cazabugs` | Fallos sutiles con un test que los reproduce | `papeles/cazabugs.md` |
-| `seguridad` | Revisión de seguridad y privacidad | `papeles/seguridad.md` |
+| `reviewer` | Revisión de código | `papeles/reviewer.md` |
+| `bug_hunter` | Fallos sutiles con un test que los reproduce | `papeles/bug-hunter.md` |
+| `security` | Revisión de seguridad y privacidad | `papeles/security.md` |
 
 ### Qué modelo hace cada papel
 
 Nunca lo decides tú ni lo supones: lo dice la configuración.
 
 ```bash
-taller agentes --json                 # papel → agente, modelo, esfuerzo, reservas y estado
-taller agentes --json --sin claude    # lo mismo, excluyendo lo que se ha quedado sin uso
+pilotfish agents --json                       # rol → agent, model, effort, fallbacks y status
+pilotfish agents --json --without claude      # lo mismo, excluyendo lo que se ha quedado sin uso
 ```
 
 - Al empezar un flujo, ejecútalo y di al usuario en una línea qué modelo hará cada papel.
-- Si un papel sale con `"estado": "pausar"`, no hay ningún modelo disponible para él: no lances ese papel; dile al usuario cuál y por qué, y espera.
+- Si un papel sale con `"status": "paused"`, no hay ningún modelo disponible para él: no lances ese papel; dile al usuario cuál y por qué, y espera.
 - Si el usuario pide otro modelo para un papel en esta tarea («que la seguridad la haga Codex»), úsalo solo para esta tarea.
-- Para tus propias fases: si `planificar` y `coordinar` son modelos distintos y tú eres el agente de ambos, al aprobarse el plan sugiere al usuario cambiar de modelo para la fase de coordinación (en Claude Code, `/model <modelo>`). Es solo una sugerencia para ahorrar.
+- Para tus propias fases: si `plan` y `coordinate` son modelos distintos y tú eres el agente de ambos, al aprobarse el plan sugiere al usuario cambiar de modelo para la fase de coordinación (en Claude Code, `/model <modelo>`). Es solo una sugerencia para ahorrar.
 
 ### Cómo lanzar un trabajador
 
@@ -65,9 +66,9 @@ Usa la orquestación de Orca (skill `orchestration`; comando `orca`). Una ejecuc
 
 1. Crea la ejecución al empezar el desarrollo (`orca orchestration run-create --objective "<flujo> NNN-nombre"`) y, si vuelves a ella, retómala con `orca orchestration run-use`.
 2. Crea la tarea con el encargo completo: el contenido íntegro de `papeles/<papel>.md` seguido de lo concreto (rama, worktree, rutas de `spec.md`, `plan.md` y `tasks.md`, tareas o hallazgos, base de comparación `origin/main`) y estas dos líneas: «Si el worktree no está preparado (faltan dependencias o `.env.worktree`), ejecuta antes `mise trust && mise install && mise run setup`» e «Indica en tu informe el commit que has evaluado o el último que has hecho (`git rev-parse --short HEAD`)».
-3. Lanza el trabajador con el agente, el modelo y el esfuerzo de `taller agentes --json`:
-   - `desarrollador`: `--worktree current` (trabaja en la rama de la funcionalidad).
-   - `qa`, `revisor`, `cazabugs` y `seguridad`: `--worktree new-child` (un worktree propio a partir de la rama; aunque toquen algo, no afecta a la rama). Antes de dar por bueno su informe, comprueba que el commit evaluado es el último de la rama.
+3. Lanza el trabajador con `agent`, `model` y `effort` de `pilotfish agents --json`:
+   - `developer`: `--worktree current` (trabaja en la rama de la funcionalidad).
+   - `qa`, `reviewer`, `bug_hunter` y `security`: `--worktree new-child` (un worktree propio a partir de la rama; aunque toquen algo, no afecta a la rama). Antes de dar por bueno su informe, comprueba que el commit evaluado es el último de la rama.
 4. Espera los resultados con `orca orchestration check --wait` y un tiempo de espera largo (unos 15 minutos), no consultando en bucle: cada consulta te cuesta uso.
 5. Lee el informe completo (`worker-read`), libera el trabajador (`worker-release`) y, si era un worktree hijo, borra sus bases (`scripts/entorno-worktree.sh --borrar` dentro de él, si el proyecto lo tiene) y el worktree (`orca worktree rm`).
 
@@ -77,9 +78,9 @@ Nunca hay dos trabajadores tocando el mismo worktree a la vez. Mientras el desar
 
 Si un trabajador termina sin informe, o su salida dice que ha llegado a un límite de uso, de cuota o que no tiene sesión:
 
-1. Vuelve a resolver los papeles excluyéndolo: `taller agentes --json --sin <agente>`.
+1. Vuelve a resolver los papeles excluyéndolo: `pilotfish agents --json --without <agente>`.
 2. Relanza el mismo encargo con el nuevo modelo y díselo al usuario en una línea.
-3. Si el papel queda en `pausar`, para y avisa al usuario de qué falta y cuándo podrá seguir.
+3. Si el papel queda en `paused`, para y avisa al usuario de qué falta y cuándo podrá seguir.
 
 ## Estado visible y relevo
 

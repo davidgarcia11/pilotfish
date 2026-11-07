@@ -16,7 +16,7 @@ Primero la causa raíz, después el test que la demuestra, después la correcci�
 git status --porcelain          # si no está vacío, para y pregunta
 git fetch origin --prune
 test "$(git rev-parse --git-dir)" = "$(git rev-parse --git-common-dir)" && echo principal || echo worktree
-taller agentes --json
+pilotfish agents --json
 ```
 
 - **Copia principal:** `git switch main && git pull --ff-only && git switch -c fix/nombre-corto`.
@@ -38,7 +38,7 @@ Si la corrección cambia el modelo de datos, contratos o varios módulos, sigue 
 
 ## 3. Test de regresión y corrección
 
-Lanza el `desarrollador` (`--worktree current`). Encargo, además de su papel:
+Lanza el `developer` (`--worktree current`). Encargo, además de su papel:
 
 > Rama `fix/nombre-corto`, en este worktree. Bug: <síntoma, pasos y causa raíz con rutas>. Primero escribe un test que reproduzca el bug y confirma que falla. Después aplica la corrección mínima aprobada: <corrección>. `mise run check` y commit `fix(ámbito): ...`. Corrige también estos sitios con el mismo patrón: <lista o «ninguno»>.
 
@@ -51,9 +51,9 @@ Lánzalos a la vez, cada uno en su worktree hijo (`--worktree new-child`):
 | Papel | Cuándo |
 |---|---|
 | `qa` | Siempre; con la comprobación de los tests sobre la corrección (revertirla debe hacer fallar el test nuevo) |
-| `seguridad` | Si el bug o la corrección tocan permisos, autenticación, entradas o datos personales |
-| `revisor` | Si la corrección supera unas 50 líneas o toca varios módulos |
-| `cazabugs` | Si el tipo de bug sugiere hermanos (límites, concurrencia, formatos) |
+| `security` | Si el bug o la corrección tocan permisos, autenticación, entradas o datos personales |
+| `reviewer` | Si la corrección supera unas 50 líneas o toca varios módulos |
+| `bug_hunter` | Si el tipo de bug sugiere hermanos (límites, concurrencia, formatos) |
 
 Encargo: rama, descripción del bug, causa raíz y corrección. Mismas reglas de gravedad, correcciones y rondas que en `flujos/funcionalidad.md`.
 

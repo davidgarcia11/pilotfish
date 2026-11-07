@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+# Pilotfish: a spec-driven, multi-model agent team for Orca.
+#
+#   pilotfish install            install the skill for this machine's agents and the pilotfish command
+#   pilotfish update             pull the latest version and reinstall
+#   pilotfish agents [--json] [--without claude,...]
+#                                which model plays each role with what is available now
+#   pilotfish config             create your own settings (~/.config/pilotfish/team.toml)
+#   pilotfish path               print the Pilotfish folder (templates, defaults)
+#   pilotfish scaffold --forge github|gitlab [--services] [--runbook] [--dir PATH]
+#                                add the project baseline to a git repository, never overwriting
+set -euo pipefail
+
+root="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+templates="$root/plantillas"
+own_config="${PILOTFISH_CONFIG:-$HOME/.config/pilotfish/team.toml}"
+
+usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+
+need_python() {
+  command -v python3 >/dev/null || { echo "python3 is required." >&2; exit 1; }
+  python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' ||
+    { echo "Python 3.11 or newer is required." >&2; exit 1; }
+}
+
+install() {
+  local target
+  for target in "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+    mkdir -p "$target"
+    ln -sfn "$root/skills/pilotfish" "$target/pilotfish"
+    echo "Skill installed at $target/pilotfish"
+  done
+  mkdir -p "$HOME/.local/bin"
+  ln -sfn "$root/bin/pilotfish" "$HOME/.local/bin/pilotfish"
+  echo "Command installed at $HOME/.local/bin/pilotfish"
+  echo
+  agents
+}
+
+agents() {
+  need_python
+  python3 -I "$root/lib/team.py" --root "$root" "$@"
+}
+
+config() {
+  if [ -f "$own_config" ]; then
+    echo "Already exists: $own_config"
+    return
+  fi
+  mkdir -p "$(dirname "$own_config")"
+  cat > "$own_config" <<FIN
+# Your team settings. They take precedence over the defaults in $root/team.toml.
+# Put here only what you want to change. For example:
+#
+# [roles]
+# developer = "standard"
+#
+# [tiers]
+# budget = ["opencode:deepseek/deepseek-chat", "claude:sonnet"]
+#
+# [rules]
+# when_tier_exhausted = "downgrade"
+FIN
+  echo "Created: $own_config"
+}
+
+scaffold() {
+  local forge="" services=0 runbook=0 dir="."
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --forge) forge="${2:-}"; shift 2 ;;
+      --services) services=1; shift ;;
+      --runbook) runbook=1; shift ;;
+      --dir) dir="${2:-}"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; usage 64 ;;
+    esac
+  done
+  case "$forge" in github|gitlab) ;; *) echo "Missing --forge github|gitlab" >&2; usage 64 ;; esac
+
+  cd "$dir"
+  if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$(pwd -P)" ]; then
+    echo "Run it at the root of a git repository (git init first)." >&2
+    exit 1
+  fi
+
+  created=(); skipped=()
+  copy_tree() {
+    local source="$1" file rel
+    [ -d "$source" ] || return 0
+    while IFS= read -r -d '' file; do
+      rel="${file#"$source"/}"
+      if [ -e "./$rel" ]; then
+        skipped+=("$rel")
+      else
+        mkdir -p "$(dirname "./$rel")"
+        cp -p "$file" "./$rel"
+        created+=("$rel")
+      fi
+    done < <(find "$source" -type f -print0 | sort -z)
+  }
+  copy_tree "$templates/comun"
+  copy_tree "$templates/forja/$forge"
+  copy_tree "$templates/docs"
+  copy_tree "$templates/local"
+  [ "$services" -eq 1 ] && copy_tree "$templates/servicios"
+  [ "$runbook" -eq 1 ] && copy_tree "$templates/opcional/runbook"
+
+  chmod +x .githooks/* scripts/*.sh .claude/hooks/*.sh 2>/dev/null || true
+  git config core.hooksPath .githooks
+
+  add_lines() {
+    local file="$1" line; shift
+    mkdir -p "$(dirname "$file")"; touch "$file"
+    for line in "$@"; do grep -qxF -- "$line" "$file" || printf '%s\n' "$line" >> "$file"; done
+  }
+  # Local only: agent instructions and settings.
+  add_lines "$(git rev-parse --git-path info/exclude)" AGENTS.md CLAUDE.md CLAUDE.local.md .claude/ .worktreeinclude
+  add_lines .gitignore ".env*" "!.env.example" ".mise/" "mise.local.toml" ".DS_Store"
+
+  echo "Baseline added (forge: $forge)."
+  [ "${#created[@]}" -gt 0 ] && { echo "Created:"; printf '  %s\n' "${created[@]}"; }
+  [ "${#skipped[@]}" -gt 0 ] && { echo "Skipped because they already exist (review them by hand):"; printf '  %s\n' "${skipped[@]}"; }
+  local tracked
+  tracked=$(git ls-files -- AGENTS.md CLAUDE.md CLAUDE.local.md .claude .worktreeinclude 2>/dev/null || true)
+  if [ -n "$tracked" ]; then
+    echo "Warning: these files are tracked by git and should leave the repository (git rm --cached):"
+    printf '%s\n' "$tracked" | sed 's/^/  /'
+  fi
+  echo "Still to fill in: the UPPERCASE placeholders and the <!-- --> comments in the templates."
+}
+
+update() {
+  git -C "$root" pull --ff-only
+  install
+}
+
+case "${1:-}" in
+  install) install ;;
+  update) update ;;
+  agents) shift; agents "$@" ;;
+  config) config ;;
+  path) echo "$root" ;;
+  scaffold) shift; scaffold "$@" ;;
+  -h|--help|"") usage ;;
+  *) echo "Unknown command: $1" >&2; usage 64 ;;
+esac

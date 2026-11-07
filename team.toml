@@ -1,0 +1,40 @@
+# Which model plays each role in the team.
+#
+# This file ships the recommended defaults and is updated with the repository.
+# Your own settings live in ~/.config/pilotfish/team.toml (create it with `pilotfish config`)
+# and take precedence: put there only what you want to change.
+#
+# Each model is written "agent:model". The agent is the command Orca launches: claude, codex, opencode, cursor…
+# With OpenCode, the model is prefixed by its provider: "opencode:deepseek/deepseek-chat".
+# Check the exact names with `codex --help` or `opencode models` before relying on them.
+
+# Each tier is a list in order of preference: the first available model is used.
+# A model is unavailable when its agent is not installed, has no active login,
+# or has run out of usage (the coordinator excludes it and moves to the next one).
+[tiers]
+strong = ["claude:opus", "codex:gpt-6-astra", "opencode:zai-coding-plan/glm-5.3"]
+standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:zai-coding-plan/glm-5.3"]
+budget = ["opencode:deepseek/deepseek-chat", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
+
+# Each role asks for a tier, or for its own list if you want something very specific:
+#   security = ["claude:opus", "codex:gpt-6-astra"]
+[roles]
+plan = "strong"           # coordinator: specification and plan
+coordinate = "standard"   # coordinator: dispatch, verify, document and open the PR
+developer = "budget"
+qa = "budget"
+reviewer = "standard"
+bug_hunter = "strong"
+security = "strong"
+
+[effort]
+default = "medium"
+# plan = "high"
+
+[rules]
+# When no model is left in a role's tier:
+#   "pause"     stop and tell the user (recommended for sensitive roles),
+#   "downgrade" use the next tier down (strong → standard → budget).
+when_tier_exhausted = "pause"
+# The reviewer picks, when possible, a model from a different provider than the developer's.
+reviewer_different_provider = true

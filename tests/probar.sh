@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pruebas del taller: base del estándar, hooks, comprobación de commits y elección de modelos.
+# Pruebas de Pilotfish: base del proyecto, hooks, comprobación de commits y elección de modelos.
 set -euo pipefail
 
 raiz="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -23,8 +23,8 @@ cd "$repo"
 git config user.email prueba@example.com
 git config user.name Prueba
 
-echo "taller base"
-"$raiz/bin/taller" base --forja github --servicios --runbook > "$tmp/salida.txt"
+echo "pilotfish scaffold"
+"$raiz/bin/pilotfish" scaffold --forge github --services --runbook > "$tmp/salida.txt"
 comprueba "crea los hooks de git" "[ -x .githooks/pre-commit ] && [ -x .githooks/commit-msg ]"
 comprueba "configura core.hooksPath" "[ \"\$(git config core.hooksPath)\" = .githooks ]"
 comprueba "crea CI, docs, compose, runbook y cliff.toml" "[ -f .github/workflows/ci.yml ] && [ -f docs/ARCHITECTURE.md ] && [ -f compose.yaml ] && [ -f docs/RUNBOOK.md ] && [ -f cliff.toml ]"
@@ -35,7 +35,7 @@ comprueba "excluye los archivos de los agentes" "git check-ignore -q AGENTS.md &
 comprueba "ignora .env.worktree" "git check-ignore -q .env.worktree && ! git check-ignore -q .env.example"
 comprueba "copia lo local a los worktrees" "grep -qxF AGENTS.md .worktreeinclude && grep -qxF CLAUDE.md .worktreeinclude && grep -qxF .env .worktreeinclude"
 comprueba "no muestra archivos de los agentes en git status" "! git status --porcelain | grep -qiE 'claude|agents|worktreeinclude'"
-"$raiz/bin/taller" base --forja github > "$tmp/salida2.txt"
+"$raiz/bin/pilotfish" scaffold --forge github > "$tmp/salida2.txt"
 comprueba "es idempotente" "! grep -q Creados \"$tmp/salida2.txt\" && [ \"\$(grep -cxF AGENTS.md .git/info/exclude)\" = 1 ]"
 
 echo "commit-msg"
@@ -66,23 +66,23 @@ comprueba "permite commits en una rama" "echo '{\"cwd\":\"$repo\"}' | bash .clau
 echo "elección de modelos"
 casa="$tmp/casa"; mkdir -p "$casa/.claude" "$casa/agentes"
 for a in claude opencode; do printf '#!/bin/sh\nexit 0\n' > "$casa/agentes/$a"; chmod +x "$casa/agentes/$a"; done
-eleccion() {  # eleccion <papel> [args…] → agente:modelo, o «pausar»
+eleccion() {  # eleccion <rol> [args…] → agente:modelo, o «paused»
   local papel="$1"; shift
-  HOME="$casa" PATH="$casa/agentes:/usr/bin:/bin" TALLER_CONFIG="$casa/equipo.toml" \
-    python3 -I "$raiz/lib/equipo.py" --raiz "$raiz" --json "$@" |
-    python3 -c "import json,sys; d=json.load(sys.stdin)['papeles']['$papel']; print('pausar' if d['estado']=='pausar' else d['agente']+':'+d['modelo'])"
+  HOME="$casa" PATH="$casa/agentes:/usr/bin:/bin" PILOTFISH_CONFIG="$casa/team.toml" \
+    python3 -I "$raiz/lib/team.py" --root "$raiz" --json "$@" |
+    python3 -c "import json,sys; d=json.load(sys.stdin)['roles']['$papel']; print('paused' if d['status']=='paused' else d['agent']+':'+d['model'])"
 }
 touch "$casa/.claude/.credentials.json"
-comprueba "solo Claude: el desarrollador usa Sonnet" "[ \"\$(eleccion desarrollador)\" = claude:sonnet ]"
-comprueba "solo Claude: planificar usa Opus" "[ \"\$(eleccion planificar)\" = claude:opus ]"
+comprueba "solo Claude: el desarrollador usa Sonnet" "[ \"\$(eleccion developer)\" = claude:sonnet ]"
+comprueba "solo Claude: planificar usa Opus" "[ \"\$(eleccion plan)\" = claude:opus ]"
 mkdir -p "$casa/.local/share/opencode"; echo '{"deepseek":{"type":"api","key":"x"}}' > "$casa/.local/share/opencode/auth.json"
-comprueba "con DeepSeek: el desarrollador usa DeepSeek" "[ \"\$(eleccion desarrollador)\" = opencode:deepseek/deepseek-chat ]"
-comprueba "con DeepSeek: el revisor es de otro proveedor" "[ \"\$(eleccion revisor)\" = claude:sonnet ]"
-comprueba "Claude sin uso: seguridad se pausa" "[ \"\$(eleccion seguridad --sin claude)\" = pausar ]"
-printf '[reglas]\nsi_no_queda_nivel = "bajar"\n' > "$casa/equipo.toml"
-comprueba "Claude sin uso y «bajar»: seguridad baja a DeepSeek" "[ \"\$(eleccion seguridad --sin claude)\" = opencode:deepseek/deepseek-chat ]"
-printf '[papeles]\nseguridad = ["claude:opus"]\n' > "$casa/equipo.toml"
-comprueba "un papel con lista propia la respeta" "[ \"\$(eleccion seguridad --sin claude)\" = pausar ]"
+comprueba "con DeepSeek: el desarrollador usa DeepSeek" "[ \"\$(eleccion developer)\" = opencode:deepseek/deepseek-chat ]"
+comprueba "con DeepSeek: el revisor es de otro proveedor" "[ \"\$(eleccion reviewer)\" = claude:sonnet ]"
+comprueba "Claude sin uso: seguridad se pausa" "[ \"\$(eleccion security --without claude)\" = paused ]"
+printf '[rules]\nwhen_tier_exhausted = "downgrade"\n' > "$casa/team.toml"
+comprueba "Claude sin uso y «downgrade»: seguridad baja a DeepSeek" "[ \"\$(eleccion security --without claude)\" = opencode:deepseek/deepseek-chat ]"
+printf '[roles]\nsecurity = ["claude:opus"]\n' > "$casa/team.toml"
+comprueba "un papel con lista propia la respeta" "[ \"\$(eleccion security --without claude)\" = paused ]"
 
 echo
 if [ "$fallos" -eq 0 ]; then echo "Todo correcto."; else echo "$fallos comprobaciones fallidas."; exit 1; fi

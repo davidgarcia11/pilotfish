@@ -14,7 +14,7 @@ Actúa como ingeniero de plataforma y arquitecto que hereda un proyecto en produ
 
 ## Fase 1. Diagnóstico
 
-Si `git status --porcelain` no está vacío, para y pregunta. Después revisa, sin modificar nada (para mapear un código grande, puedes repartir la lectura entre trabajadores `revisor` en worktrees hijos):
+Si `git status --porcelain` no está vacío, para y pregunta. Después revisa, sin modificar nada (para mapear un código grande, puedes repartir la lectura entre trabajadores `reviewer` en worktrees hijos):
 
 | Área | Qué mirar |
 |---|---|
@@ -51,7 +51,7 @@ Pide aprobación explícita e itera hasta tenerla.
 
 1. **Rama**: `git switch -c chore/adaptar-estandar`.
 2. **Runtimes**: `mise use --pin` con las versiones que el proyecto usa hoy, más `gitleaks`, `osv-scanner` y `git-cliff`. `mise trust`.
-3. **Base**: `taller base --forja <github|gitlab>` (más `--servicios` y `--runbook` si aplican). Integra a mano lo que omita por existir ya: conserva los jobs de CI existentes y añade `mise run check` y la comprobación de commits.
+3. **Base**: `pilotfish scaffold --forge <github|gitlab>` (más `--services` y `--runbook` si aplican). Integra a mano lo que omita por existir ya: conserva los jobs de CI existentes y añade `mise run check` y la comprobación de commits.
 4. **Archivos de agentes fuera de git**: `git rm -r --cached --quiet` sobre los que avise. Siguen en disco.
 5. **Tareas de mise**: `setup`, `check`, `changelog` y `version` envolviendo los scripts existentes del proyecto. Con base de datos: `servicios.toml`, `TEST_DATABASE_URL` para los tests y `mise run entorno` en `setup`, como en `flujos/nuevo-proyecto.md`.
 6. **Check en verde**: correcciones automáticas de formato y lint en un commit propio (`style: aplica formato automático`). Lo que no sea automático se resuelve según lo que decidió el usuario.

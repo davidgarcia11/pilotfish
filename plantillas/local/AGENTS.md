@@ -16,7 +16,7 @@ Estas reglas valen para cualquier agente que trabaje en el proyecto. Archivo loc
 
 ## Cómo se trabaja
 
-- Funcionalidad nueva, cambio de comportamiento o bug: siguen el proceso del taller (especificación y plan aprobados por el usuario antes de programar).
+- Funcionalidad nueva, cambio de comportamiento o bug: siguen el proceso de Pilotfish (especificación y plan aprobados por el usuario antes de programar).
 - Cambios no triviales fuera del proceso: plan y aprobación del usuario antes de tocar código.
 
 ## Reglas generales
