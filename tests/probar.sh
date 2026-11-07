@@ -23,6 +23,11 @@ cd "$repo"
 git config user.email prueba@example.com
 git config user.name Prueba
 
+echo "pilotfish help"
+ayuda="$("$raiz/bin/pilotfish")"
+if grep -q "pilotfish scaffold" <<< "$ayuda"; then ok "la ayuda lista los comandos"; else falla "la ayuda lista los comandos"; fi
+if grep -qE "set -|root=|usage" <<< "$ayuda"; then falla "la ayuda no muestra código"; else ok "la ayuda no muestra código"; fi
+
 echo "pilotfish scaffold"
 "$raiz/bin/pilotfish" scaffold --forge github --services --runbook > "$tmp/salida.txt"
 comprueba "crea los hooks de git" "[ -x .githooks/pre-commit ] && [ -x .githooks/commit-msg ]"

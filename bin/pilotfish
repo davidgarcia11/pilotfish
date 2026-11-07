@@ -15,7 +15,7 @@ root="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
 templates="$root/plantillas"
 own_config="${PILOTFISH_CONFIG:-$HOME/.config/pilotfish/team.toml}"
 
-usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+usage() { awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"; exit "${1:-0}"; }
 
 need_python() {
   command -v python3 >/dev/null || { echo "python3 is required." >&2; exit 1; }
