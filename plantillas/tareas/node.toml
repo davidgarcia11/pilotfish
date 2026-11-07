@@ -1,0 +1,15 @@
+[tasks.setup]
+description = "Tras clonar: hooks de git y dependencias"
+run = ["git config core.hooksPath .githooks", "npm ci"]
+
+[tasks.check]
+description = "Lint, formato, tipos, tests, build, secretos y dependencias. Igual que CI"
+run = [
+  "npm run lint",
+  "npx prettier --check .",
+  "npx tsc --noEmit",
+  "npm test",
+  "npm run build",
+  "gitleaks git --redact --no-banner",
+  "osv-scanner scan source -r . || test $? -eq 128",
+]

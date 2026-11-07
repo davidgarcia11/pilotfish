@@ -1,0 +1,10 @@
+[tasks.changelog]
+description = "Regenera CHANGELOG.md desde los commits (cambios sin publicar incluidos)"
+run = "git cliff -o CHANGELOG.md"
+
+[tasks.version]
+description = "Prepara una versión: calcula el número y actualiza CHANGELOG.md"
+run = [
+  "echo \"Siguiente versión: $(git cliff --bumped-version)\"",
+  "git cliff --bump -o CHANGELOG.md",
+]

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git switch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(mise run *)",
+      "Bash(mise exec *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr view *)",
+      "Bash(glab mr create *)",
+      "Bash(glab mr view *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.production)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "Bash(git push *+*)",
+      "Bash(git commit *--no-verify*)",
+      "Bash(git push *--no-verify*)",
+      "Bash(gh pr merge *)",
+      "Bash(glab mr merge *)",
+      "Bash(npm install -g *)",
+      "Bash(npm i -g *)",
+      "Bash(cat .env*)",
+      "Bash(less .env*)",
+      "Bash(more .env*)",
+      "Bash(head .env*)",
+      "Bash(tail .env*)",
+      "Bash(grep * .env*)",
+      "Bash(mise run db:reset*)",
+      "Bash(docker compose down*-v*)",
+      "Bash(docker volume rm *)",
+      "Bash(docker volume prune*)",
+      "Bash(docker system prune*)",
+      "Bash(dropdb *)",
+      "Bash(git clean *)",
+      "Bash(git push origin main*)",
+      "Bash(git push * *:main*)",
+      "Bash(gh repo delete *)",
+      "Bash(gh repo edit *)",
+      "Bash(gh release delete *)",
+      "Bash(gh secret *)",
+      "Bash(vercel --prod*)",
+      "Bash(vercel deploy --prod*)",
+      "Bash(vercel env *)",
+      "Bash(sudo *)",
+      "Bash(brew install *)",
+      "Bash(curl * | sh*)",
+      "Bash(curl * | bash*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit *)",
+            "command": "bash",
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/no-commit-main.sh"
+            ],
+            "onFailure": "block"
+          }
+        ]
+      }
+    ]
+  }
+}

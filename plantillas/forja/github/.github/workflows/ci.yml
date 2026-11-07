@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v5
+      - run: mise run setup
+      - run: mise run check
+      - name: Commits de la PR
+        if: github.event_name == 'pull_request'
+        run: bash scripts/comprobar-commits.sh "origin/${{ github.base_ref }}..HEAD"

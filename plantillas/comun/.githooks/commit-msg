@@ -1,0 +1,26 @@
+#!/bin/sh
+# 1. Deja solo contenido propio: quita trailers de coautoría, enlaces de sesión y líneas "Generated with".
+# 2. Exige conventional commits en la primera línea.
+f="$1"
+
+sed -E '/^Co-[Aa]uthored-[Bb]y:/d; /^[A-Za-z]+-Session: /d; /Generated with \[/d' "$f" |
+  awk 'NF{for(;b>0;b--)print "";print;next}{b++}' > "$f.tmp" && mv "$f.tmp" "$f"
+
+header=$(grep -v '^#' "$f" | sed -n '1p')
+
+case "$header" in
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *|amend!\ *) exit 0 ;;
+esac
+
+tipos='feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert'
+if ! printf '%s\n' "$header" | grep -Eq "^($tipos)(\([a-z0-9._/-]+\))?!?: .+"; then
+  echo "Mensaje de commit no válido: \"$header\"" >&2
+  echo "Formato: tipo(ámbito opcional): descripción" >&2
+  echo "Tipos: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert" >&2
+  exit 1
+fi
+
+if [ "${#header}" -gt 100 ]; then
+  echo "La primera línea del commit supera 100 caracteres (${#header})." >&2
+  exit 1
+fi

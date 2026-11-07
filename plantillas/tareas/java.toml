@@ -1,0 +1,11 @@
+[tasks.setup]
+description = "Tras clonar: hooks de git y dependencias"
+run = ["git config core.hooksPath .githooks", "./mvnw -B -q dependency:go-offline"]
+
+[tasks.check]
+description = "Formato, compilación, tests, secretos y dependencias. Igual que CI"
+run = [
+  "./mvnw -B spotless:check verify",
+  "gitleaks git --redact --no-banner",
+  "osv-scanner scan source -r . || test $? -eq 128",
+]

@@ -1,0 +1,32 @@
+# Servicios locales de desarrollo. La aplicación corre en la máquina con mise; aquí solo lo que necesita.
+# Puertos publicados solo en 127.0.0.1: invisibles desde la red.
+# Un solo contenedor para todos los worktrees: el nombre fijo del proyecto hace que todos usen el mismo.
+# Cada worktree tiene sus propias bases dentro de él (scripts/entorno-worktree.sh).
+name: NOMBRE
+
+services:
+  db:
+    image: postgres:VERSION_POSTGRES-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Define POSTGRES_DB en .env}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql   # Postgres 18+: el volumen va en /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # Pruebas de email: interfaz en http://127.0.0.1:8025, SMTP en 127.0.0.1:1025.
+  # mail:
+  #   image: axllent/mailpit:VERSION_MAILPIT
+  #   ports:
+  #     - "127.0.0.1:8025:8025"
+  #     - "127.0.0.1:1025:1025"
+
+volumes:
+  db-data:

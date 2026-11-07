@@ -1,0 +1,40 @@
+# Qué modelo hace cada papel del equipo.
+#
+# Esta copia trae los valores recomendados y se actualiza con el repositorio.
+# Tu configuración va en ~/.config/taller/equipo.toml (créala con `taller config`) y manda sobre esta:
+# solo hace falta poner en ella lo que quieras cambiar.
+#
+# Cada modelo se escribe "agente:modelo". El agente es el comando que lanza Orca: claude, codex, opencode, cursor…
+# Con OpenCode, el modelo lleva delante el proveedor: "opencode:deepseek/deepseek-chat".
+# Comprueba los nombres exactos con `codex --help` o `opencode models` antes de usarlos.
+
+# Cada nivel es una lista por orden de preferencia: se usa el primero disponible.
+# Un modelo deja de estar disponible si su agente no está instalado, no tiene la sesión iniciada
+# o se ha quedado sin uso (el coordinador lo marca y pasa al siguiente).
+[niveles]
+fuerte = ["claude:opus", "codex:gpt-6-astra", "opencode:zai-coding-plan/glm-5.3"]
+medio = ["claude:sonnet", "codex:gpt-6-sol", "opencode:zai-coding-plan/glm-5.3"]
+barato = ["opencode:deepseek/deepseek-chat", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
+
+# Cada papel pide un nivel, o una lista propia si lo quieres muy concreto:
+#   seguridad = ["claude:opus", "codex:gpt-6-astra"]
+[papeles]
+planificar = "fuerte"     # coordinador: especificación y plan
+coordinar = "medio"       # coordinador: repartir, comprobar, documentar y abrir la PR
+desarrollador = "barato"
+qa = "barato"
+revisor = "medio"
+cazabugs = "fuerte"
+seguridad = "fuerte"
+
+[esfuerzo]
+defecto = "medium"
+# planificar = "high"
+
+[reglas]
+# Si en el nivel de un papel no queda ningún modelo disponible:
+#   "pausar" para y avisa (recomendado para los papeles delicados),
+#   "bajar"  usa el nivel inferior (fuerte → medio → barato).
+si_no_queda_nivel = "pausar"
+# El revisor elige, si puede, un modelo de otro proveedor que el del desarrollador.
+revisor_otro_proveedor = true

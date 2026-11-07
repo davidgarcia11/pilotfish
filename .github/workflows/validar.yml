@@ -1,0 +1,27 @@
+name: Validar
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Shellcheck
+        run: |
+          shellcheck -s bash bin/taller plantillas/comun/scripts/*.sh plantillas/servicios/scripts/*.sh plantillas/local/.claude/hooks/*.sh tests/*.sh
+          shellcheck -s sh plantillas/comun/.githooks/*
+      - name: Configuración por defecto
+        run: python3 -I lib/equipo.py --raiz . > /dev/null
+      - name: Pruebas
+        run: bash tests/probar.sh

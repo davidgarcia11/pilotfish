@@ -1,0 +1,19 @@
+[env]
+# .env.worktree (bases y puertos propios de este worktree) manda sobre .env.
+_.file = [".env", ".env.worktree"]
+
+[tasks.entorno]
+description = "Bases de datos y puertos propios de este worktree (crea .env.worktree)"
+run = "scripts/entorno-worktree.sh"
+
+[tasks.db]
+description = "Levanta los servicios locales y espera a que estén listos"
+run = "docker compose up -d --wait"
+
+[tasks."db:stop"]
+description = "Para los servicios locales sin borrar datos"
+run = "docker compose stop"
+
+[tasks."db:reset"]
+description = "Borra los datos locales de todos los worktrees y vuelve a crear los servicios"
+run = ["docker compose down -v", "docker compose up -d --wait", "scripts/entorno-worktree.sh"]
