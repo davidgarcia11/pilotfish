@@ -8,11 +8,12 @@ Mejor desde la copia principal del proyecto, que es de donde copian los worktree
 
 ```bash
 git status --porcelain          # si no está vacío, para y pregunta
-test -f AGENTS.md && test -d .githooks && echo estandar || echo sin-estandar
+test -f .githooks/commit-msg && echo estandar || echo sin-estandar
+test -f AGENTS.md && echo con-locales || echo sin-locales
 git remote get-url origin       # github o gitlab
 ```
 
-Si sale `sin-estandar`, el proyecto nunca se adaptó: sigue `flujos/adaptar-proyecto.md`. Si tiene el estándar antiguo (`CLAUDE.md` con reglas y `.claude/rules/`, pero sin `AGENTS.md`), propón pasar su contenido a `AGENTS.md` y dejar `CLAUDE.md` con `@AGENTS.md`.
+Si sale `sin-estandar`, el proyecto nunca se adaptó: sigue `flujos/adaptar-proyecto.md`. Si sale `sin-locales`, es normal en un clon nuevo: los archivos locales (`AGENTS.md`, `CLAUDE.md`, `.claude/`, `.worktreeinclude`) no van en git. Créalos en el paso 3 a partir de la referencia, rellenando `AGENTS.md` con lo que el proyecto ya muestra (stack, comandos de `mise.toml`, rutas, `docs/`), y pregunta al usuario si tiene una copia de sus reglas anteriores para conservar lo que había concretado. Si tiene el estándar antiguo (`CLAUDE.md` con reglas y `.claude/rules/`, pero sin `AGENTS.md`), propón pasar su contenido a `AGENTS.md` y dejar `CLAUDE.md` con `@AGENTS.md`.
 
 ## 2. Generar la referencia
 
