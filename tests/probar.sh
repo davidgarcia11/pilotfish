@@ -39,6 +39,8 @@ comprueba "crea AGENTS.md y CLAUDE.md que lo importa" "[ -f AGENTS.md ] && grep 
 comprueba "excluye los archivos de los agentes" "git check-ignore -q AGENTS.md && git check-ignore -q CLAUDE.md && git check-ignore -q .claude/settings.json && git check-ignore -q .worktreeinclude"
 comprueba "ignora .env.worktree" "git check-ignore -q .env.worktree && ! git check-ignore -q .env.example"
 comprueba "copia lo local a los worktrees" "grep -qxF AGENTS.md .worktreeinclude && grep -qxF CLAUDE.md .worktreeinclude && grep -qxF .env .worktreeinclude"
+comprueba "crea orca.yaml con los scripts de preparación y archivado" "grep -q '^scripts:' orca.yaml && grep -q '^  setup:' orca.yaml && grep -q '^  archive:' orca.yaml && grep -q 'mise run setup' orca.yaml && grep -q 'entorno-worktree.sh --borrar' orca.yaml"
+comprueba "el merge pide confirmación y no está prohibido" "python3 -c \"import json,sys; p=json.load(open('.claude/settings.json'))['permissions']; sys.exit(0 if 'Bash(gh pr merge *)' in p['ask'] and 'Bash(gh pr merge *)' not in p['deny'] else 1)\""
 comprueba "no muestra archivos de los agentes en git status" "! git status --porcelain | grep -qiE 'claude|agents|worktreeinclude'"
 "$raiz/bin/pilotfish" scaffold --forge github > "$tmp/salida2.txt"
 comprueba "es idempotente" "! grep -q Creados \"$tmp/salida2.txt\" && [ \"\$(grep -cxF AGENTS.md .git/info/exclude)\" = 1 ]"
@@ -67,6 +69,31 @@ echo "no-commit-main"
 comprueba "bloquea commits en main con historial" "! echo '{\"cwd\":\"$repo\"}' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
 git switch -q -c feat/prueba
 comprueba "permite commits en una rama" "echo '{\"cwd\":\"$repo\"}' | bash .claude/hooks/no-commit-main.sh"
+
+echo "entorno por worktree"
+falso="$tmp/falso"; mkdir -p "$falso"; export SQL_LOG="$tmp/sql.log"
+cat > "$falso/docker" <<'FIN'
+#!/bin/sh
+case "$*" in
+  *"ps -q"*) echo contenedor ;;
+  *psql*) for a; do ultimo=$a; done; echo "$ultimo" >> "$SQL_LOG" ;;
+esac
+FIN
+chmod +x "$falso/docker"
+printf 'POSTGRES_USER=app\nPOSTGRES_PASSWORD=clave\nPOSTGRES_DB=app\nPOSTGRES_PORT=5432\n' > .env
+PATH="$falso:$PATH" bash scripts/entorno-worktree.sh > /dev/null
+comprueba "la copia principal usa sus bases de siempre" "grep -q '/app\$' .env.worktree && grep -q 'app_test:app_test@127.0.0.1:5432/app_test\$' .env.worktree"
+comprueba "la copia principal conserva los puertos de .env" "! grep -qE '^(PORT|E2E_PORT)=' .env.worktree"
+comprueba "la copia principal no se puede borrar" "! PATH=\"$falso:\$PATH\" bash scripts/entorno-worktree.sh --borrar 2>/dev/null"
+git worktree add -q "$tmp/Tarea-Uno" -b tarea-uno
+cp .env "$tmp/Tarea-Uno/.env"
+(cd "$tmp/Tarea-Uno" && PATH="$falso:$PATH" bash "$repo/scripts/entorno-worktree.sh" > /dev/null)
+comprueba "un worktree tiene bases propias acabadas en _test" "grep -q '/app_tarea_uno\$' '$tmp/Tarea-Uno/.env.worktree' && grep -q '/app_tarea_uno_test\$' '$tmp/Tarea-Uno/.env.worktree'"
+comprueba "las bases de tests son del rol de tests" "grep -q 'CREATE DATABASE \"app_tarea_uno_test\" OWNER \"app_test\"' \"\$SQL_LOG\""
+comprueba "un worktree tiene puertos propios" "grep -qE '^PORT=3[0-9]+\$' '$tmp/Tarea-Uno/.env.worktree' && grep -qE '^E2E_PORT=4[0-9]+\$' '$tmp/Tarea-Uno/.env.worktree'"
+(cd "$tmp/Tarea-Uno" && PATH="$falso:$PATH" bash "$repo/scripts/entorno-worktree.sh" --borrar > /dev/null)
+comprueba "al borrar un worktree se borran solo sus bases" "grep -q 'DROP DATABASE IF EXISTS \"app_tarea_uno_test\"' \"\$SQL_LOG\" && ! grep -qE 'DROP DATABASE IF EXISTS \"app(_test)?\"' \"\$SQL_LOG\" && [ ! -f '$tmp/Tarea-Uno/.env.worktree' ]"
+git worktree remove --force "$tmp/Tarea-Uno"
 
 echo "elección de modelos"
 casa="$tmp/casa"; mkdir -p "$casa/.claude" "$casa/agentes"
