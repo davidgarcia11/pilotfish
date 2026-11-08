@@ -70,7 +70,13 @@ comprueba "permite commits en una rama" "echo '{\"cwd\":\"$repo\"}' | bash .clau
 
 echo "elección de modelos"
 casa="$tmp/casa"; mkdir -p "$casa/.claude" "$casa/agentes"
-for a in claude opencode; do printf '#!/bin/sh\nexit 0\n' > "$casa/agentes/$a"; chmod +x "$casa/agentes/$a"; done
+printf '#!/bin/sh\nexit 0\n' > "$casa/agentes/claude"
+cat > "$casa/agentes/opencode" <<'FIN'
+#!/bin/sh
+[ "$1 $2" = "models deepseek" ] && printf 'deepseek/deepseek-flash\ndeepseek/deepseek-v4-pro\n'
+exit 0
+FIN
+chmod +x "$casa/agentes/claude" "$casa/agentes/opencode"
 eleccion() {  # eleccion <rol> [args…] → agente:modelo, o «paused»
   local papel="$1"; shift
   HOME="$casa" PATH="$casa/agentes:/usr/bin:/bin" PILOTFISH_CONFIG="$casa/team.toml" \
@@ -81,11 +87,14 @@ touch "$casa/.claude/.credentials.json"
 comprueba "solo Claude: el desarrollador usa Sonnet" "[ \"\$(eleccion developer)\" = claude:sonnet ]"
 comprueba "solo Claude: planificar usa Opus" "[ \"\$(eleccion plan)\" = claude:opus ]"
 mkdir -p "$casa/.local/share/opencode"; echo '{"deepseek":{"type":"api","key":"x"}}' > "$casa/.local/share/opencode/auth.json"
-comprueba "con DeepSeek: el desarrollador usa DeepSeek" "[ \"\$(eleccion developer)\" = opencode:deepseek/deepseek-chat ]"
+comprueba "con DeepSeek: el desarrollador usa DeepSeek Flash" "[ \"\$(eleccion developer)\" = opencode:deepseek/deepseek-flash ]"
 comprueba "con DeepSeek: el revisor es de otro proveedor" "[ \"\$(eleccion reviewer)\" = claude:sonnet ]"
-comprueba "Claude sin uso: seguridad se pausa" "[ \"\$(eleccion security --without claude)\" = paused ]"
-printf '[rules]\nwhen_tier_exhausted = "downgrade"\n' > "$casa/team.toml"
-comprueba "Claude sin uso y «downgrade»: seguridad baja a DeepSeek" "[ \"\$(eleccion security --without claude)\" = opencode:deepseek/deepseek-chat ]"
+comprueba "Claude sin uso: seguridad pasa a DeepSeek Pro" "[ \"\$(eleccion security --without claude)\" = opencode:deepseek/deepseek-v4-pro ]"
+comprueba "Claude y DeepSeek sin uso: seguridad se pausa" "[ \"\$(eleccion security --without claude,deepseek)\" = paused ]"
+printf '[tiers]\nstrong = ["claude:opus"]\n[rules]\nwhen_tier_exhausted = "downgrade"\n' > "$casa/team.toml"
+comprueba "Claude sin uso y «downgrade»: seguridad baja al nivel estándar" "[ \"\$(eleccion security --without claude)\" = opencode:deepseek/deepseek-v4-pro ]"
+printf '[tiers]\nbudget = ["opencode:deepseek/deepseek-chat", "claude:sonnet"]\n' > "$casa/team.toml"
+comprueba "salta un modelo que OpenCode no ofrece" "[ \"\$(eleccion developer)\" = claude:sonnet ]"
 printf '[roles]\nsecurity = ["claude:opus"]\n' > "$casa/team.toml"
 comprueba "un papel con lista propia la respeta" "[ \"\$(eleccion security --without claude)\" = paused ]"
 

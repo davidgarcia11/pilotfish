@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -18,6 +19,19 @@ CREDENTIALS = {
 }
 AGENT_PROVIDER = {"claude": "anthropic", "codex": "openai"}
 OPENCODE_AUTH = "~/.local/share/opencode/auth.json"
+_opencode_models: dict[str, set[str] | None] = {}
+
+
+def opencode_models(prov: str) -> set[str] | None:
+    """Models OpenCode offers for a provider, or None if it can't tell."""
+    if prov not in _opencode_models:
+        try:
+            out = subprocess.run(["opencode", "models", prov], capture_output=True, text=True, timeout=30)
+            names = {line.strip() for line in out.stdout.splitlines() if line.strip().startswith(prov + "/")}
+            _opencode_models[prov] = names if out.returncode == 0 and names else None
+        except (OSError, subprocess.SubprocessError):
+            _opencode_models[prov] = None
+    return _opencode_models[prov]
 
 
 def read_text(path: str) -> str:
@@ -92,6 +106,9 @@ def unavailable_reason(entry: str, without: set[str]) -> str | None:
                 keys = {}
         if prov not in keys and not os.environ.get(variable):
             return f"opencode has no credentials for {prov}"
+        offered = opencode_models(prov)
+        if offered is not None and model not in offered:
+            return f"opencode does not offer {model} (see `opencode models {prov}`)"
     return None
 
 

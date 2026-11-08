@@ -56,7 +56,7 @@ config() {
 # developer = "standard"
 #
 # [tiers]
-# budget = ["opencode:deepseek/deepseek-chat", "claude:sonnet"]
+# budget = ["opencode:deepseek/deepseek-flash", "claude:sonnet"]
 #
 # [rules]
 # when_tier_exhausted = "downgrade"

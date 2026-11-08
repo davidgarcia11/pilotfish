@@ -103,9 +103,9 @@ Roles ask for a **tier**; each tier is a list of models in order of preference (
 
 ```toml
 [tiers]
-strong   = ["claude:opus", "codex:gpt-6-astra", "opencode:zai-coding-plan/glm-5.3"]
-standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:zai-coding-plan/glm-5.3"]
-budget   = ["opencode:deepseek/deepseek-chat", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
+strong   = ["claude:opus", "codex:gpt-6-astra", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
+standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
+budget   = ["opencode:deepseek/deepseek-flash", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
 
 [roles]
 plan       = "strong"     # coordinator: spec and plan
@@ -121,7 +121,7 @@ when_tier_exhausted = "pause"   # or "downgrade"
 reviewer_different_provider = true
 ```
 
-- **The first available model wins.** A model is skipped if its agent isn't installed, isn't logged in, or ran out of usage. Install Codex tomorrow and it joins automatically — it's already on the lists.
+- **The first available model wins.** A model is skipped if its agent isn't installed, isn't logged in, doesn't offer that model, or ran out of usage. Install Codex tomorrow and it joins automatically — it's already on the lists.
 - **Your overrides** live in `~/.config/pilotfish/team.toml` (`pilotfish config` creates it). Add only what you change; updates never touch it.
 - **A role can have its own list** instead of a tier, e.g. `security = ["claude:opus", "codex:gpt-6-astra"]`.
 - **One-off changes:** tell the coordinator "use Codex for security on this one" and it applies just to that task.
@@ -133,8 +133,8 @@ $ pilotfish agents
 Role         Tier      Uses                                       Fallbacks
 plan         strong    claude:opus                                —
 coordinate   standard  claude:sonnet                              —
-developer    budget    opencode:deepseek/deepseek-chat            claude:sonnet
-qa           budget    opencode:deepseek/deepseek-chat            claude:sonnet
+developer    budget    opencode:deepseek/deepseek-flash           claude:sonnet
+qa           budget    opencode:deepseek/deepseek-flash           claude:sonnet
 reviewer     standard  claude:sonnet                              —
 bug_hunter   strong    claude:opus                                —
 security     strong    claude:opus                                —
