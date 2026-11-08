@@ -82,7 +82,7 @@ gh repo clone davidgarcia11/pilotfish ~/pilotfish
 ~/pilotfish/bin/pilotfish install
 ```
 
-This links the `pilotfish` skill for your agents (`~/.claude/skills`, `~/.agents/skills`), puts the `pilotfish` command in `~/.local/bin`, and shows which model will play each role.
+This links the `pilotfish` skill for your agents (`~/.claude/skills`, `~/.agents/skills`), puts the `pilotfish` command in `~/.local/bin`, lets Claude Code read (not edit) the Pilotfish folder without asking, and shows which model will play each role.
 
 **Use it:** open a task in Orca with your coordinator agent and just say what you want.
 

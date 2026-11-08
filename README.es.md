@@ -82,7 +82,7 @@ gh repo clone davidgarcia11/pilotfish ~/pilotfish
 ~/pilotfish/bin/pilotfish install
 ```
 
-Enlaza la skill `pilotfish` para tus agentes (`~/.claude/skills`, `~/.agents/skills`), deja el comando `pilotfish` en `~/.local/bin` y te enseña qué modelo hará cada papel.
+Enlaza la skill `pilotfish` para tus agentes (`~/.claude/skills`, `~/.agents/skills`), deja el comando `pilotfish` en `~/.local/bin`, permite a Claude Code leer (no editar) la carpeta de Pilotfish sin preguntar y te enseña qué modelo hará cada papel.
 
 **Uso:** abre una tarea en Orca con tu agente coordinador y di lo que quieres.
 

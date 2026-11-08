@@ -33,8 +33,36 @@ install() {
   mkdir -p "$HOME/.local/bin"
   ln -sfn "$root/bin/pilotfish" "$HOME/.local/bin/pilotfish"
   echo "Command installed at $HOME/.local/bin/pilotfish"
+  claude_access
   echo
   agents
+}
+
+# Lets Claude Code read Pilotfish's files (the skill is a symlink outside every project)
+# without asking each time, and keeps it from editing them.
+claude_access() {
+  [ -d "$HOME/.claude" ] || return 0
+  need_python
+  python3 -I - "$HOME/.claude/settings.json" "$root" <<'PY'
+import json, sys
+from pathlib import Path
+path, root = Path(sys.argv[1]), sys.argv[2]
+try:
+    data = json.loads(path.read_text()) if path.is_file() and path.read_text().strip() else {}
+except ValueError:
+    print(f"Skipped Claude Code access: {path} is not valid JSON")
+    sys.exit(0)
+perms = data.setdefault("permissions", {})
+changed = False
+for key, value in (("additionalDirectories", root), ("deny", f"Edit(/{root}/**)")):
+    items = perms.setdefault(key, [])
+    if value not in items:
+        items.append(value)
+        changed = True
+if changed:
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+print(f"Claude Code can read {root} and cannot edit it")
+PY
 }
 
 agents() {
