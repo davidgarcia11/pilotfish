@@ -5,16 +5,16 @@
 # and take precedence: put there only what you want to change.
 #
 # Each model is written "agent:model". The agent is the command Orca launches: claude, codex, opencode, cursor…
-# With OpenCode, the model is prefixed by its provider: "opencode:deepseek/deepseek-chat".
-# Check the exact names with `codex --help` or `opencode models` before relying on them.
+# With OpenCode, the model is prefixed by its provider: "opencode:deepseek/deepseek-flash".
+# Pilotfish skips OpenCode models that `opencode models <provider>` does not list.
 
 # Each tier is a list in order of preference: the first available model is used.
 # A model is unavailable when its agent is not installed, has no active login,
 # or has run out of usage (the coordinator excludes it and moves to the next one).
 [tiers]
-strong = ["claude:opus", "codex:gpt-6-astra", "opencode:zai-coding-plan/glm-5.3"]
-standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:zai-coding-plan/glm-5.3"]
-budget = ["opencode:deepseek/deepseek-chat", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
+strong = ["claude:opus", "codex:gpt-6-astra", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
+standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
+budget = ["opencode:deepseek/deepseek-flash", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
 
 # Each role asks for a tier, or for its own list if you want something very specific:
 #   security = ["claude:opus", "codex:gpt-6-astra"]
