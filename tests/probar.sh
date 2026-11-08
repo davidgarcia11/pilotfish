@@ -28,6 +28,18 @@ ayuda="$("$raiz/bin/pilotfish")"
 if grep -q "pilotfish scaffold" <<< "$ayuda"; then ok "la ayuda lista los comandos"; else falla "la ayuda lista los comandos"; fi
 if grep -qE "set -|root=|usage" <<< "$ayuda"; then falla "la ayuda no muestra código"; else ok "la ayuda no muestra código"; fi
 
+echo "pilotfish install"
+casa_i="$tmp/casa-install"; mkdir -p "$casa_i/.claude"
+printf '{\n  "model": "sonnet",\n  "hooks": {"Stop": []}\n}\n' > "$casa_i/.claude/settings.json"
+HOME="$casa_i" "$raiz/bin/pilotfish" install > /dev/null
+HOME="$casa_i" "$raiz/bin/pilotfish" install > /dev/null
+ajustes="$casa_i/.claude/settings.json"
+comprobar_ajustes() { python3 -c "import json,sys; d=json.load(open('$ajustes')); p=d['permissions']; sys.exit(0 if $1 else 1)"; }
+if comprobar_ajustes "p['additionalDirectories'] == ['$raiz']"; then ok "Claude puede leer Pilotfish"; else falla "Claude puede leer Pilotfish"; fi
+if comprobar_ajustes "p['deny'] == ['Edit(/$raiz/**)']"; then ok "Claude no puede editar Pilotfish"; else falla "Claude no puede editar Pilotfish"; fi
+if comprobar_ajustes "d['model'] == 'sonnet' and 'Stop' in d['hooks']"; then ok "conserva los ajustes que había"; else falla "conserva los ajustes que había"; fi
+if [ -L "$casa_i/.claude/skills/pilotfish" ] && [ -L "$casa_i/.local/bin/pilotfish" ]; then ok "enlaza la skill y el comando"; else falla "enlaza la skill y el comando"; fi
+
 echo "pilotfish scaffold"
 "$raiz/bin/pilotfish" scaffold --forge github --services --runbook > "$tmp/salida.txt"
 comprueba "crea los hooks de git" "[ -x .githooks/pre-commit ] && [ -x .githooks/commit-msg ]"
