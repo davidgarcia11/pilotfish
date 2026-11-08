@@ -40,7 +40,7 @@ comprueba "excluye los archivos de los agentes" "git check-ignore -q AGENTS.md &
 comprueba "ignora .env.worktree" "git check-ignore -q .env.worktree && ! git check-ignore -q .env.example"
 comprueba "copia lo local a los worktrees" "grep -qxF AGENTS.md .worktreeinclude && grep -qxF CLAUDE.md .worktreeinclude && grep -qxF .env .worktreeinclude"
 comprueba "crea orca.yaml con los scripts de preparación y archivado" "grep -q '^scripts:' orca.yaml && grep -q '^  setup:' orca.yaml && grep -q '^  archive:' orca.yaml && grep -q 'mise run setup' orca.yaml && grep -q 'entorno-worktree.sh --borrar' orca.yaml"
-comprueba "el merge pide confirmación y no está prohibido" "python3 -c \"import json,sys; p=json.load(open('.claude/settings.json'))['permissions']; sys.exit(0 if 'Bash(gh pr merge *)' in p['ask'] and 'Bash(gh pr merge *)' not in p['deny'] else 1)\""
+comprueba "los agentes no pueden hacer merge" "python3 -c \"import json,sys; p=json.load(open('.claude/settings.json'))['permissions']; sys.exit(0 if 'Bash(gh pr merge *)' in p['deny'] and 'Bash(glab mr merge *)' in p['deny'] else 1)\""
 comprueba "no muestra archivos de los agentes en git status" "! git status --porcelain | grep -qiE 'claude|agents|worktreeinclude'"
 "$raiz/bin/pilotfish" scaffold --forge github > "$tmp/salida2.txt"
 comprueba "es idempotente" "! grep -q Creados \"$tmp/salida2.txt\" && [ \"\$(grep -cxF AGENTS.md .git/info/exclude)\" = 1 ]"

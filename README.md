@@ -39,7 +39,7 @@ Pilotfish gives your agents a **process**, a **team structure**, and **guardrail
 | 🌳 **Parallel by design** | Auditors work in isolated worktrees; each worktree gets its own databases and ports. |
 | 🛡️ **Guardrails in the repo** | Git hooks and CI block secrets, enforce conventional commits and reject AI attribution — for every agent, even if it skips the hooks. |
 | 🤝 **Handoff** | All state lives in the repo, in Orca and in the worktree status. Any agent can say "continue" and pick up where another left off. |
-| 🙋 **You stay in charge** | Approvals in chat (or from your phone with Orca Mobile). Every PR ends with a question: who merges it, and how. |
+| 🙋 **You stay in charge** | Approvals in chat (or from your phone with Orca Mobile). Merges are always yours; afterwards the coordinator syncs and prepares everything. |
 
 ## 🔄 How it works
 
@@ -60,7 +60,7 @@ flowchart TD
     G --> H{Blocking findings?}
     H -->|yes, max 2 rounds| F
     H -->|no| I[📬 Pull request]
-    I --> J([✅ You choose: you merge, or the coordinator does])
+    I --> J([✅ You review and merge])
 ```
 
 - **The coordinator** is the agent you talk to in an Orca task. It writes the spec and the plan, dispatches work through Orca's orchestration, and checks every result against evidence.

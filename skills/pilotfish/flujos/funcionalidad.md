@@ -124,4 +124,4 @@ gh pr create --title "feat(ámbito): descripción" --body-file <archivo>
 # GitLab: glab mr create --title "..." --description "$(cat <archivo>)" --remove-source-branch --yes
 ```
 
-Después, la sección «Al terminar un flujo» de `SKILL.md`: CI, pregunta del merge y puesta al día.
+Después, la sección «Al terminar un flujo» de `SKILL.md`: CI, cierre y, tras el merge del usuario, puesta al día.

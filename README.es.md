@@ -39,7 +39,7 @@ Pilotfish da a tus agentes un **proceso**, una **estructura de equipo** y **prot
 | 🌳 **Pensado para trabajar en paralelo** | Los auditores trabajan en worktrees aislados y cada worktree tiene sus propias bases de datos y puertos. |
 | 🛡️ **Protecciones en el repositorio** | Los hooks de git y el CI bloquean secretos, exigen commits convencionales y rechazan firmas de IA, para cualquier agente y aunque se salte los hooks. |
 | 🤝 **Relevo** | Todo el estado vive en el repositorio, en Orca y en el estado del worktree. Cualquier agente puede decir «continúa» y seguir donde lo dejó otro. |
-| 🙋 **Tú mandas** | Apruebas en el chat (o desde el móvil con Orca Móvil). Cada PR termina con una pregunta: quién hace el merge y de qué tipo. |
+| 🙋 **Tú mandas** | Apruebas en el chat (o desde el móvil con Orca Móvil). El merge siempre lo haces tú; después, el coordinador lo pone todo al día. |
 
 ## 🔄 Cómo funciona
 
@@ -60,7 +60,7 @@ flowchart TD
     G --> H{¿Hallazgos graves?}
     H -->|sí, máx. 2 rondas| F
     H -->|no| I[📬 Pull request]
-    I --> J([✅ Eliges: haces el merge tú o el coordinador])
+    I --> J([✅ Revisas y haces merge])
 ```
 
 - **El coordinador** es el agente con el que hablas en una tarea de Orca. Escribe la especificación y el plan, reparte el trabajo con la orquestación de Orca y comprueba cada resultado con evidencias.

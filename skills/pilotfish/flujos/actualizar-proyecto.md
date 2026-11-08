@@ -30,7 +30,7 @@ pilotfish scaffold --forge <github|gitlab> [--services] [--runbook] --dir "$ref"
 |---|---|
 | Falta en el proyecto | Crearlo, rellenando los marcadores con los datos reales |
 | `AGENTS.md` | Solo las reglas de la referencia que no estén ya, con estas u otras palabras |
-| `.claude/settings.json` | Entradas de `allow`, `ask` y `deny` y hooks que falten. Nunca quitar una entrada del proyecto, salvo `gh pr merge` y `glab mr merge`: si están en `deny` (estándar anterior), propón pasarlas a `ask` |
+| `.claude/settings.json` | Entradas de `allow` y `deny` y hooks que falten. Nunca quitar una entrada del proyecto |
 | `.githooks/*`, `.claude/hooks/*`, `scripts/*` | Si difieren, el diff completo y si el cambio del proyecto parece intencionado |
 | CI, plantillas de PR, `cliff.toml`, `dependabot.yml` | Lo que falte (por ejemplo, la comprobación de commits), adaptado al proyecto |
 | `docs/` | Solo secciones que falten en los documentos base |

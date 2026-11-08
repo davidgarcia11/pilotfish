@@ -148,7 +148,7 @@ gh repo create <nombre> --private --source=. --remote=origin --push   # si ya ex
 
 GitLab: `glab repo create <nombre> --private --defaultBranch main` y `git push -u origin main`.
 
-GitHub: activa las alertas y actualizaciones de seguridad de Dependabot con los comandos de `guias/seguridad.md`. Un repositorio privado gratuito no protege ramas: los hooks, el CI, las auditorías y que ningún merge se haga sin el permiso del usuario hacen de barrera.
+GitHub: activa las alertas y actualizaciones de seguridad de Dependabot con los comandos de `guias/seguridad.md`. Un repositorio privado gratuito no protege ramas: los hooks, el CI, las auditorías y el merge hecho por el usuario hacen de barrera.
 
 ### 8. Comprobación de limpieza
 

@@ -66,4 +66,4 @@ git push -u origin fix/nombre-corto
 
 Cuerpo con la plantilla del proyecto: síntoma, causa raíz, corrección, test de regresión, cómo probarlo y pendientes. Título `fix(ámbito): descripción`. Si hay datos dañados que reparar, indícalo como paso aparte. Si el bug fue grave en producción, propón al usuario un informe en `docs/incidencias/AAAA-MM-DD-titulo.md` (cronología, causa raíz, impacto y acciones).
 
-Después, la sección «Al terminar un flujo» de `SKILL.md`: CI, pregunta del merge y puesta al día.
+Después, la sección «Al terminar un flujo» de `SKILL.md`: CI, cierre y, tras el merge del usuario, puesta al día.

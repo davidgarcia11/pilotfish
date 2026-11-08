@@ -67,4 +67,4 @@ Antes de nada: secretos rotados, copia completa (`git clone --mirror`) y aviso a
 
 ## Cierre
 
-Resume en 8 líneas como máximo: qué tenía, qué cambia, URL de la PR, deuda pendiente y riesgos abiertos. Termina con lo que el usuario tiene que hacer en Orca, como al final de `flujos/nuevo-proyecto.md`, y con la pregunta del merge de «Al terminar un flujo» en `SKILL.md`.
+Resume en 8 líneas como máximo: qué tenía, qué cambia, URL de la PR, deuda pendiente y riesgos abiertos. Termina con lo que el usuario tiene que hacer en Orca, como al final de `flujos/nuevo-proyecto.md`, y con «Al terminar un flujo» de `SKILL.md`.

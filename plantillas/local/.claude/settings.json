@@ -22,10 +22,6 @@
       "Bash(glab mr create *)",
       "Bash(glab mr view *)"
     ],
-    "ask": [
-      "Bash(gh pr merge *)",
-      "Bash(glab mr merge *)"
-    ],
     "deny": [
       "Read(./.env)",
       "Read(./.env.local)",
@@ -38,6 +34,8 @@
       "Bash(git push *+*)",
       "Bash(git commit *--no-verify*)",
       "Bash(git push *--no-verify*)",
+      "Bash(gh pr merge *)",
+      "Bash(glab mr merge *)",
       "Bash(npm install -g *)",
       "Bash(npm i -g *)",
       "Bash(cat .env*)",
