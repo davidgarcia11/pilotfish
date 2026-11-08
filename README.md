@@ -39,7 +39,7 @@ Pilotfish gives your agents a **process**, a **team structure**, and **guardrail
 | 🌳 **Parallel by design** | Auditors work in isolated worktrees; each worktree gets its own databases and ports. |
 | 🛡️ **Guardrails in the repo** | Git hooks and CI block secrets, enforce conventional commits and reject AI attribution — for every agent, even if it skips the hooks. |
 | 🤝 **Handoff** | All state lives in the repo, in Orca and in the worktree status. Any agent can say "continue" and pick up where another left off. |
-| 🙋 **You stay in charge** | Approvals in chat (or from your phone with Orca Mobile). Merges are always yours. |
+| 🙋 **You stay in charge** | Approvals in chat (or from your phone with Orca Mobile). Merges are always yours; afterwards the coordinator syncs and prepares everything. |
 
 ## 🔄 How it works
 
@@ -147,13 +147,12 @@ security     strong    claude:opus                                —
 
 ## 🧩 Per-project setup in Orca
 
-In **Settings → Repository**:
+Almost nothing: the project carries it.
 
-- **Base ref:** `origin/main`
-- **Setup script:** `mise trust && mise install && mise run setup`
-- **On worktree removal** (if available): `scripts/entorno-worktree.sh --borrar`
+- **`orca.yaml`** holds the setup script (`mise trust && mise install && mise run setup`) and the archive script (drops the worktree's databases).
+- **`.worktreeinclude`** tells Orca which local files (`.env`, `AGENTS.md`, `CLAUDE.md`, `.claude/`) to copy into each new worktree.
 
-Projects with a database get their own databases and ports per worktree (`.env.worktree`), so parallel tasks never collide.
+Per project you only create the `.env` with your secrets and add the project in Orca with base ref `origin/main`. Projects with a database get their own databases and ports per worktree (`.env.worktree`), so parallel tasks never collide.
 
 ## 📁 What Pilotfish adds to a project
 
@@ -163,7 +162,8 @@ my-project/
 ├── .github/            CI (check + commit verification), PR template   │
 ├── scripts/            comprobar-commits.sh, entorno-worktree.sh       │ committed
 ├── docs/               architecture, ADRs, specs, runbook              │
-├── mise.toml           pinned tools and tasks                          ┘
+├── mise.toml           pinned tools and tasks                          │
+├── orca.yaml           worktree setup and archive scripts for Orca     ┘
 ├── AGENTS.md           project rules for any agent                     ┐
 ├── CLAUDE.md           @AGENTS.md                                      │ local only
 ├── .claude/            permissions and a no-commit-on-main hook        │

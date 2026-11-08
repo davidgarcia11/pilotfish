@@ -5,7 +5,7 @@ Actúa como ingeniero de plataforma y arquitecto que hereda un proyecto en produ
 ## Reglas
 
 - Las fases 1 y 2 son de solo lectura. La fase 3 empieza solo con aprobación explícita.
-- Todo el cambio va en la rama `chore/adaptar-estandar` y termina en una PR/MR. El merge lo hace el usuario.
+- Todo el cambio va en la rama `chore/adaptar-estandar` y termina en una PR/MR, con la sección «Al terminar un flujo» de `SKILL.md`.
 - No reescribas historial, no hagas force push y no borres ramas sin una confirmación explícita y separada para esa acción.
 - No silencies reglas de lint ni desactives tests para que el check pase. Si algo no se puede arreglar dentro de esta PR, lo decide el usuario.
 - Sin refactors de código de producto: esta PR cambia herramientas, configuración y documentación.
@@ -53,12 +53,13 @@ Pide aprobación explícita e itera hasta tenerla.
 2. **Runtimes**: `mise use --pin` con las versiones que el proyecto usa hoy, más `gitleaks`, `osv-scanner` y `git-cliff`. `mise trust`.
 3. **Base**: `pilotfish scaffold --forge <github|gitlab>` (más `--services` y `--runbook` si aplican). Integra a mano lo que omita por existir ya: conserva los jobs de CI existentes y añade `mise run check` y la comprobación de commits.
 4. **Archivos de agentes fuera de git**: `git rm -r --cached --quiet` sobre los que avise. Siguen en disco.
-5. **Tareas de mise**: `setup`, `check`, `changelog` y `version` envolviendo los scripts existentes del proyecto. Con base de datos: `servicios.toml`, `TEST_DATABASE_URL` para los tests y `mise run entorno` en `setup`, como en `flujos/nuevo-proyecto.md`.
+5. **Tareas de mise**: `setup`, `check`, `changelog` y `version` envolviendo los scripts existentes del proyecto. Con base de datos: `servicios.toml`, `TEST_DATABASE_URL` para los tests y `mise run entorno` en `setup`, siguiendo «Entorno por worktree» de `flujos/nuevo-proyecto.md`. Si el proyecto ya crea su base de tests a su manera, explica al usuario cómo encaja antes de aplicarlo.
 6. **Check en verde**: correcciones automáticas de formato y lint en un commit propio (`style: aplica formato automático`). Lo que no sea automático se resuelve según lo que decidió el usuario.
 7. **Documentación**: `docs/ARCHITECTURE.md` describiendo el sistema tal como es hoy, sin inventar intenciones y enlazando la documentación existente; `docs/adr/0001-stack-y-arquitectura.md` con el stack existente como decisión aceptada; `docs/specs/README.md`; README con requisitos, arranque y comandos; `CHANGELOG.md` desde los commits si ya usan conventional commits, o una entrada inicial; `docs/RUNBOOK.md` si hay despliegue, marcando lo que no exista.
 8. **`AGENTS.md`** (local) con la realidad del proyecto: vocabulario, reglas, comandos y zonas con sus rutas reales. `CLAUDE.md` con `@AGENTS.md`.
 9. **Protecciones**: las dos pruebas de `flujos/nuevo-proyecto.md` (secreto y mensaje sin formato) deben fallar.
-10. **PR**: commits lógicos, `mise run check` en verde, push y PR/MR con la plantilla. Resume diagnóstico, cambios y deuda pendiente.
+10. **Auditorías**: como dice «Ninguna PR sin revisión» en `SKILL.md`: revisor, cazabugs (scripts, CI, hooks, entorno por worktree) y seguridad si toca permisos, secretos o autenticación.
+11. **PR**: commits lógicos, `mise run check` en verde, push y PR/MR con la plantilla. Resume diagnóstico, cambios, resultado de las auditorías y deuda pendiente.
 
 ### Limpieza del historial (solo si el usuario la pidió en la fase 2)
 
@@ -66,4 +67,4 @@ Antes de nada: secretos rotados, copia completa (`git clone --mirror`) y aviso a
 
 ## Cierre
 
-Resume en 8 líneas como máximo: qué tenía, qué cambia, URL de la PR, deuda pendiente y riesgos abiertos. Termina con la configuración de Orca del final de `flujos/nuevo-proyecto.md`.
+Resume en 8 líneas como máximo: qué tenía, qué cambia, URL de la PR, deuda pendiente y riesgos abiertos. Termina con lo que el usuario tiene que hacer en Orca, como al final de `flujos/nuevo-proyecto.md`, y con «Al terminar un flujo» de `SKILL.md`.

@@ -80,13 +80,23 @@ Si el scaffold hizo su propio commit, borra `.git` y vuelve a `git init -b main`
 pilotfish scaffold --forge github   # o gitlab; --services y --runbook si el plan los incluye
 ```
 
-Copia sin sobrescribir: hooks de git (secretos, formato de commits y firmas de IA), `scripts/comprobar-commits.sh`, `cliff.toml`, CI, plantilla de PR/MR, `docs/`, `AGENTS.md`, `CLAUDE.md`, `.claude/` (permisos y hook que bloquea commits en `main`), `.worktreeinclude`, y con `--services` el `compose.yaml` y `scripts/entorno-worktree.sh`. Configura `core.hooksPath`, la exclusión local y el `.gitignore`. Lee su salida y resuelve lo que indique.
+Copia sin sobrescribir: hooks de git (secretos, formato de commits y firmas de IA), `scripts/comprobar-commits.sh`, `cliff.toml`, CI, plantilla de PR/MR, `docs/`, `AGENTS.md`, `CLAUDE.md`, `.claude/` (permisos y hook que bloquea commits en `main`), `.worktreeinclude`, `orca.yaml` (scripts de preparación y archivado de cada worktree), y con `--services` el `compose.yaml` y `scripts/entorno-worktree.sh`. Configura `core.hooksPath`, la exclusión local y el `.gitignore`. Lee su salida y resuelve lo que indique.
 
 ### 4. Rellenar con el plan aprobado
 
 - `mise.toml`: las tareas de `$(pilotfish path)/plantillas/tareas/<stack>.toml` (no las copia `pilotfish scaffold`: adáptalas al proyecto), más `version.toml` y, con servicios, `servicios.toml`. `check` incluye lint, formato, tipos, tests, build, `gitleaks` y `osv-scanner`. Con servicios, `setup` termina con `mise run entorno`.
 - Herramientas de lint, formato y test del stack como dependencias de desarrollo, con su configuración.
-- **Con base de datos:** la app usa `DATABASE_URL` y los tests `TEST_DATABASE_URL`, nunca la de desarrollo, con las migraciones aplicadas antes de ejecutarlos. El servidor de desarrollo usa `PORT` y los e2e `E2E_PORT`. Todas salen de `.env.worktree`, que mise carga después de `.env`. En CI, el servicio de base de datos hace de base de tests. En `.env` usa una contraseña de base de datos sin caracteres especiales de URL.
+- **Con base de datos:** la app usa `DATABASE_URL` y los tests `TEST_DATABASE_URL`, nunca la de desarrollo, con las migraciones aplicadas antes de ejecutarlos. En CI, el servicio de base de datos hace de base de tests. En `.env` usa una contraseña de base de datos sin caracteres especiales de URL. Sigue «Entorno por worktree».
+
+#### Entorno por worktree
+
+`scripts/entorno-worktree.sh` da a cada worktree sus bases y sus puertos en `.env.worktree`, que mise carga después de `.env`; la copia principal conserva los de `.env`.
+
+- **Bases:** la principal, `<POSTGRES_DB>` y `<POSTGRES_DB>_test`; cada worktree, `<POSTGRES_DB>_<worktree>` y `<POSTGRES_DB>_<worktree>_test`. Las de tests son del rol `<POSTGRES_DB>_test`. Pon en el código una guarda que impida ejecutar los tests si el nombre de la base no acaba en `_test`.
+- **Puertos:** el servidor de desarrollo lee `PORT` y los e2e `E2E_PORT`, con el valor de `.env` (o uno fijo) por defecto. Nunca un puerto escrito a fuego en la configuración de los e2e.
+- **Variables que dependen del puerto** (URL pública de la app, de autenticación, de callback…): rellena `variables_del_puerto` en el script para que sigan al puerto de cada worktree, con el mismo host que en `.env` (`localhost` y `127.0.0.1` son orígenes distintos para las librerías de autenticación). Si los e2e arrancan su propio servidor, que le pasen esas variables con su puerto.
+- **`setup`** ejecuta `mise run entorno` fuera de CI (`[ -n "$CI" ] || mise run entorno`), antes de instalar dependencias.
+- **`db:reset`** borra también las bases de los worktrees: dilo en el README o el RUNBOOK.
 - Con API: OpenAPI generado desde el código, nunca escrito a mano, exportado con `mise run api-docs`; `check` falla si no coincide.
 - `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/adr/0001-stack-y-arquitectura.md` y, con despliegue, `docs/RUNBOOK.md` con el plan aprobado. En `AGENTS.md`, sustituye `RUTAS_*` por los patrones reales (por ejemplo `src/**/*.test.ts`) y `COMANDO_TEST_ARCHIVO` por el comando del stack; borra las zonas que no apliquen y añade las del dominio.
 - Seguridad del código inicial según `guias/seguridad.md`: cabeceras, validación de configuración y autenticación de librería desde el primer commit.
@@ -138,7 +148,7 @@ gh repo create <nombre> --private --source=. --remote=origin --push   # si ya ex
 
 GitLab: `glab repo create <nombre> --private --defaultBranch main` y `git push -u origin main`.
 
-GitHub: activa las alertas y actualizaciones de seguridad de Dependabot con los comandos de `guias/seguridad.md`. Un repositorio privado gratuito no protege ramas: los hooks, el CI y el merge hecho por el usuario hacen de barrera.
+GitHub: activa las alertas y actualizaciones de seguridad de Dependabot con los comandos de `guias/seguridad.md`. Un repositorio privado gratuito no protege ramas: los hooks, el CI, las auditorías y el merge hecho por el usuario hacen de barrera.
 
 ### 8. Comprobación de limpieza
 
@@ -147,8 +157,7 @@ GitHub: activa las alertas y actualizaciones de seguridad de Dependabot con los 
 
 ### 9. Cierre
 
-Resume en 8 líneas como máximo: ruta, stack, URL del repo y comandos. Termina con la configuración de Orca para el repositorio (Ajustes → Repositorio):
+Resume en 8 líneas como máximo: ruta, stack, URL del repo y comandos. Termina con lo que el usuario tiene que hacer en Orca, que es poco porque `orca.yaml` ya lleva los scripts de cada worktree:
 
-- Rama base: `origin/main`.
-- Script de preparación: `mise trust && mise install && mise run setup`.
-- Al borrar un worktree, si Orca permite un script de archivo: `scripts/entorno-worktree.sh --borrar`.
+- Añadir el proyecto, con la rama base `origin/main` (Ajustes → Repositorio).
+- Si ese repositorio tiene scripts de preparación o archivado escritos en los ajustes de Orca, borrarlos para que mande `orca.yaml`.

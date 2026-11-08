@@ -39,7 +39,7 @@ Pilotfish da a tus agentes un **proceso**, una **estructura de equipo** y **prot
 | 🌳 **Pensado para trabajar en paralelo** | Los auditores trabajan en worktrees aislados y cada worktree tiene sus propias bases de datos y puertos. |
 | 🛡️ **Protecciones en el repositorio** | Los hooks de git y el CI bloquean secretos, exigen commits convencionales y rechazan firmas de IA, para cualquier agente y aunque se salte los hooks. |
 | 🤝 **Relevo** | Todo el estado vive en el repositorio, en Orca y en el estado del worktree. Cualquier agente puede decir «continúa» y seguir donde lo dejó otro. |
-| 🙋 **Tú mandas** | Apruebas en el chat (o desde el móvil con Orca Móvil). El merge siempre lo haces tú. |
+| 🙋 **Tú mandas** | Apruebas en el chat (o desde el móvil con Orca Móvil). El merge siempre lo haces tú; después, el coordinador lo pone todo al día. |
 
 ## 🔄 Cómo funciona
 
@@ -147,13 +147,12 @@ security     strong    claude:opus                                —
 
 ## 🧩 Configuración de Orca por proyecto
 
-En **Ajustes → Repositorio**:
+Casi nada: lo lleva el propio proyecto.
 
-- **Rama base:** `origin/main`
-- **Script de preparación:** `mise trust && mise install && mise run setup`
-- **Al borrar un worktree** (si está disponible): `scripts/entorno-worktree.sh --borrar`
+- **`orca.yaml`** contiene el script de preparación (`mise trust && mise install && mise run setup`) y el de archivado (borra las bases del worktree).
+- **`.worktreeinclude`** le dice a Orca qué archivos locales (`.env`, `AGENTS.md`, `CLAUDE.md`, `.claude/`) copiar a cada worktree nuevo.
 
-Los proyectos con base de datos tienen sus propias bases y puertos por worktree (`.env.worktree`), así que las tareas en paralelo nunca se pisan.
+Por proyecto solo creas el `.env` con tus secretos y añades el proyecto en Orca con la rama base `origin/main`. Los proyectos con base de datos tienen sus propias bases y puertos por worktree (`.env.worktree`), así que las tareas en paralelo nunca se pisan.
 
 ## 📁 Qué añade Pilotfish a un proyecto
 
@@ -163,7 +162,8 @@ mi-proyecto/
 ├── .github/            CI (check + comprobación de commits), plantilla PR │
 ├── scripts/            comprobar-commits.sh, entorno-worktree.sh         │ en git
 ├── docs/               arquitectura, ADR, especificaciones, runbook      │
-├── mise.toml           herramientas fijadas y tareas                     ┘
+├── mise.toml           herramientas fijadas y tareas                     │
+├── orca.yaml           qué ejecuta Orca al crear y archivar un worktree  ┘
 ├── AGENTS.md           reglas del proyecto para cualquier agente         ┐
 ├── CLAUDE.md           @AGENTS.md                                        │ solo local
 ├── .claude/            permisos y hook que bloquea commits en main       │

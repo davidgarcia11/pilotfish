@@ -28,11 +28,28 @@ Si dudas entre dos, pregunta con una sola frase. Si lo que pide es trivial (una 
 
 - **Idioma:** habla con el usuario en su idioma y escribe la especificación, el plan, los commits y la PR en el idioma del proyecto (el de `AGENTS.md` y el código existente; si no hay, el del usuario).
 - **El usuario aprueba** la especificación y el plan (y en un arreglo, el diagnóstico). Sin aprobación explícita no se escribe código.
-- **Nunca haces merge.** Todo termina en una PR abierta.
+- **Nunca haces merge.** Todo flujo termina en una PR que mergea el usuario. Lo que viene después del merge (poner al día, preparar, cerrar el worktree) sí es tuyo: «Al terminar un flujo».
+- **Ninguna PR sin revisión.** Antes de abrir cualquier PR, también en los flujos de actualizar y adaptar, pasa al menos el revisor (`reviewer`); el cazabugs (`bug_hunter`) si cambian scripts, CI, hooks o configuración; y seguridad (`security`) si tocan permisos, secretos o autenticación. Se lanzan como en «Cómo lanzar un trabajador» y sus hallazgos graves se corrigen antes de la PR.
 - **Autoría:** nada en commits, PR, código ni documentos menciona a ningún asistente, modelo ni herramienta de IA. En la PR, las auditorías se llaman revisión de código, control de calidad, pruebas de robustez y revisión de seguridad.
 - **Los trabajadores no ven esta conversación** ni hablan con el usuario: cada encargo lleva todo lo que necesitan. Sus preguntas las contestas tú o se las haces tú al usuario.
 - **Instrucciones del proyecto:** `AGENTS.md` (local, fuera de git). Si en la copia principal falta, el proyecto no sigue el estándar: propón `flujos/adaptar-proyecto.md`.
 - **Archivos locales en un worktree:** `AGENTS.md`, `CLAUDE.md` y `.claude/` llegan a cada worktree al crearlo. Cada cambio aprobado en ellos se aplica también en la copia principal (`dirname "$(git rev-parse --path-format=absolute --git-common-dir)"`), editando esas líneas, nunca copiando el archivo entero. Si la ruta de la copia principal y la del worktree son el mismo archivo (enlace), aplícalo una sola vez.
+
+## Al empezar un flujo: poner al día
+
+Antes del primer paso de cualquier flujo, pon al día la copia principal, que es de donde salen los worktrees nuevos:
+
+```bash
+principal="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
+git -C "$principal" fetch -q origin
+antes=$(git -C "$principal" rev-parse HEAD)
+git -C "$principal" pull --ff-only     # solo si está en main y sin cambios; si no, avisa y sigue
+git -C "$principal" diff --name-only "$antes" HEAD
+```
+
+Si entre lo que ha llegado hay archivos de preparación (`mise.toml`, `scripts/entorno-worktree.sh`, `orca.yaml`, el archivo de bloqueo de dependencias, `.env.example`), ejecuta `mise run setup` en la copia principal. Si en `.env.example` aparecen variables nuevas que no están en `.env`, díselo al usuario: el `.env` no lo lees ni lo editas tú.
+
+Si una PR que quedó en `in-review` ya está mergeada (`gh pr list --state merged --limit 5`), haz lo de «Después del merge» de «Al terminar un flujo».
 
 ## El equipo
 
@@ -91,7 +108,7 @@ orca worktree current --json                      # lee primero lo que ya hay
 orca worktree set --worktree active --workspace-status in-progress --comment "<fase> · <qué se ha hecho> · <siguiente paso>"
 ```
 
-Usa `todo`, `in-progress`, `in-review` (PR abierta) y `completed` (merge hecho por el usuario).
+Usa `todo`, `in-progress`, `in-review` (PR abierta) y `completed` (PR mergeada).
 
 **Relevo.** Si el usuario te pide continuar un flujo que dejó a medias otro coordinador (por ejemplo, porque se quedó sin uso):
 
@@ -101,5 +118,14 @@ Usa `todo`, `in-progress`, `in-review` (PR abierta) y `completed` (merge hecho p
 
 ## Al terminar un flujo
 
-- Estado del worktree a `in-review` con la URL de la PR.
-- Cierra con: URL de la PR, resumen en 5 líneas, pendientes y «El merge es tuyo cuando revises el diff».
+1. Estado del worktree a `in-review` con la URL de la PR.
+2. Espera a que el CI de la PR termine (`gh pr checks <número> --watch`, o `glab ci status`). Si falla, arréglalo antes de seguir.
+3. Cierra con: URL de la PR, resumen en 5 líneas (qué cambia, resultado de las auditorías, CI y pendientes) y «Cuando hagas merge, dímelo y lo dejo todo al día».
+
+**Después del merge**, cuando el usuario te diga que lo ha hecho, o cuando lo veas al empezar otro flujo:
+
+1. Comprueba que la PR está mergeada (`gh pr view <número> --json state`, o `glab mr view <número>`).
+2. Pon al día la copia principal como en «Al empezar un flujo: poner al día», incluida la preparación si cambió algún archivo de preparación.
+3. Borra la rama local de la PR si queda en la copia principal (`git branch -d <rama>`, que solo borra ramas ya integradas).
+4. Estado del worktree a `completed`.
+5. Si el flujo se hizo en un worktree de tarea, dile al usuario que ya puede archivarlo en Orca: al archivarlo, Orca ejecuta el script de archivado de `orca.yaml` y se borran sus bases. No lo borres tú mientras trabajas dentro de él.
