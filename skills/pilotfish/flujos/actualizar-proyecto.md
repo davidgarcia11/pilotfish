@@ -30,14 +30,16 @@ pilotfish scaffold --forge <github|gitlab> [--services] [--runbook] --dir "$ref"
 |---|---|
 | Falta en el proyecto | Crearlo, rellenando los marcadores con los datos reales |
 | `AGENTS.md` | Solo las reglas de la referencia que no estén ya, con estas u otras palabras |
-| `.claude/settings.json` | Entradas de `allow` y `deny` y hooks que falten. Nunca quitar una entrada del proyecto |
+| `.claude/settings.json` | Entradas de `allow`, `ask` y `deny` y hooks que falten. Nunca quitar una entrada del proyecto, salvo `gh pr merge` y `glab mr merge`: si están en `deny` (estándar anterior), propón pasarlas a `ask` |
 | `.githooks/*`, `.claude/hooks/*`, `scripts/*` | Si difieren, el diff completo y si el cambio del proyecto parece intencionado |
 | CI, plantillas de PR, `cliff.toml`, `dependabot.yml` | Lo que falte (por ejemplo, la comprobación de commits), adaptado al proyecto |
 | `docs/` | Solo secciones que falten en los documentos base |
 | `mise.toml` | Tareas y `[env]` de la referencia que no existan; sin tocar las versiones fijadas |
 | `.worktreeinclude`, `.gitignore`, `.git/info/exclude` | Líneas que falten |
 
-Si el proyecto tiene base de datos y los tests usan la de desarrollo, o no puede trabajar en varios worktrees a la vez, propón `scripts/entorno-worktree.sh`, `TEST_DATABASE_URL` y `mise run entorno` en `setup`.
+Si el proyecto tiene base de datos y los tests usan la de desarrollo, o no puede trabajar en varios worktrees a la vez, propón `scripts/entorno-worktree.sh`, `TEST_DATABASE_URL` y `mise run entorno` en `setup`, siguiendo «Entorno por worktree» de `flujos/nuevo-proyecto.md`. Si el proyecto ya tiene su propia forma de crear la base de tests (un script de inicio del contenedor, un rol propio), explica al usuario cómo encaja antes de aplicarlo.
+
+Si falta `orca.yaml` y el usuario tiene scripts de preparación o archivado en los ajustes de Orca, al cerrar dile que los borre para que mande el de `orca.yaml`.
 
 Comprueba además que `git config core.hooksPath` es `.githooks` y que ningún archivo de agentes está en git.
 
@@ -54,5 +56,7 @@ Pregunta qué se aplica, por archivo. Si no falta nada, dilo y termina.
 
 1. Lo local aprobado, directamente (si estás en un worktree, también en la copia principal).
 2. Lo del repositorio aprobado, en la rama `chore/actualizar-estandar` (en un worktree: renombrando la rama actual si no tiene commits propios, como en `flujos/funcionalidad.md`).
-3. Commits lógicos (`chore: …`, `ci: …`, `docs: …`), `mise run check` en verde, push y PR con la plantilla del proyecto. El merge lo hace el usuario.
-4. `rm -rf "$ref"`.
+3. Commits lógicos (`chore: …`, `ci: …`, `docs: …`) y `mise run check` en verde.
+4. Auditorías antes de la PR, como dice «Ninguna PR sin revisión» en `SKILL.md`: el revisor siempre y el cazabugs si cambian scripts, CI, hooks o `mise.toml`. Si cambia el entorno por worktree, que el cazabugs lo pruebe en un worktree hijo (crear y borrar sus bases) sin tocar las de la copia principal.
+5. Push, PR con la plantilla del proyecto y la sección «Al terminar un flujo» de `SKILL.md`.
+6. `rm -rf "$ref"`.
