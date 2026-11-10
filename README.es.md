@@ -97,7 +97,7 @@ Enlaza la skill `pilotfish` para tus agentes (`~/.claude/skills`, `~/.agents/ski
 | «X falla…» | [Arreglo](skills/pilotfish/flujos/arreglo.md) |
 | «Continúa» | Relevo: sigue un flujo que otro coordinador dejó a medias |
 
-**Actualizar:** `pilotfish update`.
+**Actualizar:** el coordinador descarga la última versión de Pilotfish al empezar cada flujo y vuelve a leer sus instrucciones si han cambiado. Ejecuta `pilotfish update` tú cuando te lo pida (cambios de permisos) o cuando quieras.
 
 ## 🎛️ Elegir modelos
 

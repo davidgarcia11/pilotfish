@@ -37,7 +37,19 @@ Si dudas entre dos, pregunta con una sola frase. Si lo que pide es trivial (una 
 
 ## Al empezar un flujo: poner al día
 
-Antes del primer paso de cualquier flujo, pon al día la copia principal, que es de donde salen los worktrees nuevos:
+**Primero, Pilotfish.** Tus instrucciones son los archivos de esta skill, que es un enlace a la copia de Pilotfish de esta máquina. Ponla al día:
+
+```bash
+pf="$(pilotfish path)"
+antes=$(git -C "$pf" rev-parse HEAD)
+git -C "$pf" pull -q --ff-only        # si falla (cambios locales, sin red), avisa al usuario y sigue
+git -C "$pf" diff --name-only "$antes" HEAD
+```
+
+- Si ha cambiado algo en `skills/pilotfish/`, vuelve a leer este `SKILL.md` y el flujo que vas a seguir antes de continuar: lo que cargaste al empezar la conversación es la versión anterior.
+- Si ha cambiado `bin/pilotfish` o `plantillas/local/.claude/settings.json`, pide al usuario que ejecute `pilotfish update` en una terminal: vuelve a instalar los permisos de Claude y las prohibiciones de OpenCode, y eso no lo haces tú porque toca tus propios permisos.
+
+**Después, el proyecto.** Pon al día la copia principal, que es de donde salen los worktrees nuevos:
 
 ```bash
 principal="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
