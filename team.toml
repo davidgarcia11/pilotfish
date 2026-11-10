@@ -27,9 +27,12 @@ reviewer = "standard"
 bug_hunter = "strong"
 security = "strong"
 
+# Reasoning effort of each worker Orca launches (low, medium, high). Roles not listed use "default".
+# It matters for Claude workers; other agents may ignore it. More effort means more usage.
+# The coordinator's own effort is the one of the tab you open in Orca.
 [effort]
 default = "medium"
-# plan = "high"
+# qa = "low"
 
 [rules]
 # When no model is left in a role's tier:

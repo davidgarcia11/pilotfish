@@ -127,6 +127,20 @@ reviewer_different_provider = true
 - **Tus cambios** van en `~/.config/pilotfish/team.toml` (lo crea `pilotfish config`). Pon solo lo que cambies; las actualizaciones nunca lo tocan.
 - **Un papel puede tener su propia lista** en vez de un nivel, por ejemplo `security = ["claude:opus", "codex:gpt-6-astra"]`.
 - **Cambios puntuales:** dile al coordinador «que la seguridad la haga Codex en esta» y lo aplica solo a esa tarea.
+- **Esfuerzo por papel:** `[effort]` fija cuánto piensa cada trabajador (`low`, `medium`, `high`); los papeles que no pongas usan `default` (`medium`). Cuenta en los trabajadores de Claude, y más esfuerzo es más consumo. El esfuerzo del coordinador es el de la pestaña que abres tú en Orca.
+
+Una configuración personal que desarrolla con DeepSeek V4 Pro y ahorra uso en QA:
+
+```toml
+# ~/.config/pilotfish/team.toml
+[roles]
+developer = ["opencode:deepseek/deepseek-v4-pro", "opencode:deepseek/deepseek-flash", "claude:sonnet"]
+
+[effort]
+qa = "low"
+```
+
+Cada línea pertenece a la `[sección]` que tiene encima: `qa = "low"` debajo de `[roles]` significaría «QA usa un nivel llamado low». La plantilla comentada que crea `pilotfish config` lista todas las opciones.
 
 Para ver qué usará cada papel ahora mismo:
 
