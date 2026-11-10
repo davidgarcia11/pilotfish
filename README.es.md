@@ -82,7 +82,9 @@ gh repo clone davidgarcia11/pilotfish ~/pilotfish
 ~/pilotfish/bin/pilotfish install
 ```
 
-Enlaza la skill `pilotfish` para tus agentes (`~/.claude/skills`, `~/.agents/skills`), deja el comando `pilotfish` en `~/.local/bin`, permite a Claude Code leer (no editar) la carpeta de Pilotfish sin preguntar y te enseña qué modelo hará cada papel.
+Enlaza la skill `pilotfish` para tus agentes (`~/.claude/skills`, `~/.agents/skills`), deja el comando `pilotfish` en `~/.local/bin`, permite a Claude Code leer (no editar) la carpeta de Pilotfish sin preguntar, da a OpenCode las mismas prohibiciones que a Claude y te enseña qué modelo hará cada papel.
+
+**En Orca** (Ajustes → host del servidor → Agentes): pon **Permisos** en **Aprobar por mí** y comprueba que los argumentos de Claude no incluyen `--dangerously-skip-permissions`. Orca viene con acceso total por defecto, y los trabajadores de la orquestación lo heredan.
 
 **Uso:** abre una tarea en Orca con tu agente coordinador y di lo que quieres.
 

@@ -34,8 +34,49 @@ install() {
   ln -sfn "$root/bin/pilotfish" "$HOME/.local/bin/pilotfish"
   echo "Command installed at $HOME/.local/bin/pilotfish"
   claude_access
+  opencode_access
   echo
   agents
+}
+
+# Gives OpenCode the same prohibitions as Claude (the deny list in the project template), in its global config.
+# OpenCode allows almost everything by default. If OpenCode rejects the result, the previous file is restored.
+opencode_access() {
+  command -v opencode > /dev/null 2>&1 || [ -d "$HOME/.config/opencode" ] || return 0
+  need_python
+  local file="$HOME/.config/opencode/opencode.json" backup
+  mkdir -p "$(dirname "$file")"
+  backup="$(mktemp)"
+  [ -f "$file" ] && cp "$file" "$backup"
+  python3 -I - "$file" "$templates/local/.claude/settings.json" <<'PY' || { rm -f "$backup"; return 0; }
+import json, re, sys
+from pathlib import Path
+path, claude = Path(sys.argv[1]), Path(sys.argv[2])
+try:
+    data = json.loads(path.read_text()) if path.is_file() and path.read_text().strip() else {}
+except ValueError:
+    print(f"Skipped OpenCode rules: {path} is not valid JSON")
+    sys.exit(1)
+denies = [m.group(1) for r in json.loads(claude.read_text())["permissions"]["deny"]
+          if (m := re.fullmatch(r"Bash\((.*)\)", r))]
+data.setdefault("$schema", "https://opencode.ai/config.json")
+perm = data.setdefault("permission", {})
+for key, rules in (("bash", {d: "deny" for d in denies}),
+                   ("read", {"*.env": "deny", "*.env.*": "deny", "*.env.example": "allow"})):
+    current = perm.get(key)
+    if not isinstance(current, dict):
+        current = {} if current is None else {"*": current}
+    current.update(rules)
+    perm[key] = current
+path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+PY
+  if command -v opencode > /dev/null 2>&1 && ! opencode debug config > /dev/null 2>&1; then
+    if [ -s "$backup" ]; then cp "$backup" "$file"; else rm -f "$file"; fi
+    echo "OpenCode rejected the rules; $file left as it was. Report this with: opencode debug config"
+  else
+    echo "OpenCode has the same prohibitions as Claude ($file)"
+  fi
+  rm -f "$backup"
 }
 
 # Lets Claude Code read Pilotfish's files (the skill is a symlink outside every project)
