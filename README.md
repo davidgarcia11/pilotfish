@@ -125,6 +125,20 @@ reviewer_different_provider = true
 - **Your overrides** live in `~/.config/pilotfish/team.toml` (`pilotfish config` creates it). Add only what you change; updates never touch it.
 - **A role can have its own list** instead of a tier, e.g. `security = ["claude:opus", "codex:gpt-6-astra"]`.
 - **One-off changes:** tell the coordinator "use Codex for security on this one" and it applies just to that task.
+- **Effort per role:** `[effort]` sets how hard each worker thinks (`low`, `medium`, `high`); roles not listed use `default` (`medium`). It matters for Claude workers, and more effort means more usage. The coordinator's own effort is the one of the tab you open in Orca.
+
+A personal config that uses DeepSeek V4 Pro to develop and saves usage on QA:
+
+```toml
+# ~/.config/pilotfish/team.toml
+[roles]
+developer = ["opencode:deepseek/deepseek-v4-pro", "opencode:deepseek/deepseek-flash", "claude:sonnet"]
+
+[effort]
+qa = "low"
+```
+
+Each line belongs to the `[section]` above it: `qa = "low"` under `[roles]` would mean "QA uses a tier called low". The commented template that `pilotfish config` creates lists every option.
 
 See what each role will use right now:
 

@@ -77,17 +77,31 @@ config() {
   fi
   mkdir -p "$(dirname "$own_config")"
   cat > "$own_config" <<FIN
-# Your team settings. They take precedence over the defaults in $root/team.toml.
-# Put here only what you want to change. For example:
+# Your team settings. They take precedence over the defaults in $root/team.toml,
+# which you shouldn't edit (updates overwrite it). Put here only what you want to change.
+# Each line belongs to the [section] above it. Check the result with: pilotfish agents
 #
+# Which model plays each role. Roles: plan, coordinate, developer, qa, reviewer, bug_hunter, security.
+# A role takes a tier (strong, standard, budget) or its own list, first available first:
 # [roles]
 # developer = "standard"
+# security = ["claude:opus", "codex:gpt-6-astra"]
 #
+# The models of a tier, first available first. Models are "agent:model";
+# with OpenCode, "opencode:provider/model" (see: opencode models <provider>).
 # [tiers]
 # budget = ["opencode:deepseek/deepseek-flash", "claude:sonnet"]
 #
+# Reasoning effort of each worker (low, medium, high). Roles not listed use "default".
+# It matters for Claude workers; more effort means more usage.
+# [effort]
+# default = "medium"
+# qa = "low"
+#
+# What to do when no model of a role's tier is available: "pause" (stop and tell you) or "downgrade".
 # [rules]
 # when_tier_exhausted = "downgrade"
+# reviewer_different_provider = true
 FIN
   echo "Created: $own_config"
 }
