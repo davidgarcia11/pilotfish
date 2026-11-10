@@ -82,7 +82,9 @@ gh repo clone davidgarcia11/pilotfish ~/pilotfish
 ~/pilotfish/bin/pilotfish install
 ```
 
-This links the `pilotfish` skill for your agents (`~/.claude/skills`, `~/.agents/skills`), puts the `pilotfish` command in `~/.local/bin`, lets Claude Code read (not edit) the Pilotfish folder without asking, and shows which model will play each role.
+This links the `pilotfish` skill for your agents (`~/.claude/skills`, `~/.agents/skills`), puts the `pilotfish` command in `~/.local/bin`, lets Claude Code read (not edit) the Pilotfish folder without asking, gives OpenCode the same prohibitions as Claude, and shows which model will play each role.
+
+**In Orca** (Settings → your server host → Agents): set **Permissions** to **Approve for me** and make sure Claude's arguments don't include `--dangerously-skip-permissions`. Orca's default is full access, and orchestration workers inherit it.
 
 **Use it:** open a task in Orca with your coordinator agent and just say what you want.
 

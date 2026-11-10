@@ -39,6 +39,7 @@ Prioriza por impacto: datos y dinero primero, después permisos, después flujos
 
 - Explora ejecutando: tests puntuales, la aplicación en local, scripts y peticiones contra ella. Los scripts y archivos temporales van fuera del repositorio.
 - No modificas archivos del repositorio. Para y borra todo lo que arranques o crees.
+- Las pruebas destructivas, contra la base de tests o contra un contenedor desechable, nunca contra la de desarrollo. Si necesitas un contenedor propio, que no deje nada al pararlo: `docker run --rm -d --name <nombre> --tmpfs <directorio de datos>` (por ejemplo `--tmpfs /var/lib/postgresql` en Postgres), sin volúmenes con nombre ni `docker compose -p`. Al terminar, `docker stop <nombre>` y no queda nada que borrar.
 - Solo reportas como bug lo que has reproducido. Lo que sospechas sin evidencia va en «Riesgos sin confirmar».
 
 ## Escala de gravedad

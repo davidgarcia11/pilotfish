@@ -40,6 +40,26 @@ if comprobar_ajustes "p['deny'] == ['Edit(/$raiz/**)']"; then ok "Claude no pued
 if comprobar_ajustes "d['model'] == 'sonnet' and 'Stop' in d['hooks']"; then ok "conserva los ajustes que había"; else falla "conserva los ajustes que había"; fi
 if [ -L "$casa_i/.claude/skills/pilotfish" ] && [ -L "$casa_i/.local/bin/pilotfish" ]; then ok "enlaza la skill y el comando"; else falla "enlaza la skill y el comando"; fi
 
+echo "prohibiciones de OpenCode"
+casa_o="$tmp/casa-opencode"; mkdir -p "$casa_o/bin" "$casa_o/.config/opencode"
+printf '#!/bin/sh\nexit 0\n' > "$casa_o/bin/opencode"; chmod +x "$casa_o/bin/opencode"
+printf '{\n  "model": "deepseek/deepseek-flash",\n  "permission": {"bash": "ask"}\n}\n' > "$casa_o/.config/opencode/opencode.json"
+HOME="$casa_o" PATH="$casa_o/bin:$PATH" "$raiz/bin/pilotfish" install > /dev/null
+HOME="$casa_o" PATH="$casa_o/bin:$PATH" "$raiz/bin/pilotfish" install > /dev/null
+oc="$casa_o/.config/opencode/opencode.json"
+comprobar_oc() { python3 -c "import json,sys; d=json.load(open('$oc')); p=d['permission']; sys.exit(0 if $1 else 1)"; }
+if comprobar_oc "p['bash'].get('git push origin main*') == 'deny' and p['bash'].get('mise run db:reset*') == 'deny' and p['bash'].get('gh pr merge *') == 'deny'"; then ok "OpenCode tiene las prohibiciones de Claude"; else falla "OpenCode tiene las prohibiciones de Claude"; fi
+if comprobar_oc "p['read'].get('*.env') == 'deny' and p['read'].get('*.env.example') == 'allow'"; then ok "OpenCode no puede leer .env"; else falla "OpenCode no puede leer .env"; fi
+if comprobar_oc "d['model'] == 'deepseek/deepseek-flash' and p['bash'].get('*') == 'ask'"; then ok "conserva la configuración de OpenCode que había"; else falla "conserva la configuración de OpenCode que había"; fi
+cat > "$casa_o/bin/opencode" <<'FIN'
+#!/bin/sh
+[ "$1 $2" = "debug config" ] && exit 1
+exit 0
+FIN
+rm "$oc"; printf '{"model": "x"}\n' > "$oc"
+HOME="$casa_o" PATH="$casa_o/bin:$PATH" "$raiz/bin/pilotfish" install > "$tmp/oc-salida.txt"
+if [ "$(cat "$oc")" = '{"model": "x"}' ] && grep -q "rejected" "$tmp/oc-salida.txt"; then ok "si OpenCode rechaza las reglas, deja su archivo como estaba"; else falla "si OpenCode rechaza las reglas, deja su archivo como estaba"; fi
+
 echo "pilotfish scaffold"
 "$raiz/bin/pilotfish" scaffold --forge github --services --runbook > "$tmp/salida.txt"
 comprueba "crea los hooks de git" "[ -x .githooks/pre-commit ] && [ -x .githooks/commit-msg ]"

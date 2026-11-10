@@ -86,14 +86,18 @@ Usa la orquestación de Orca (comando `orca`). Antes del primer encargo del fluj
 3. Lanza el trabajador con `agent`, `model` y `effort` de `pilotfish agents --json`:
    - `developer`: `--worktree current` (trabaja en la rama de la funcionalidad).
    - `qa`, `reviewer`, `bug_hunter` y `security`: `--worktree new-child` (un worktree propio a partir de la rama; aunque toquen algo, no afecta a la rama). Antes de dar por bueno su informe, comprueba que el commit evaluado es el último de la rama.
-4. Espera los resultados con `orca orchestration check --wait` y un tiempo de espera largo (unos 15 minutos), no consultando en bucle: cada consulta te cuesta uso.
+4. Espera los resultados con `orca orchestration check --wait` y un tiempo de espera largo (unos 15 minutos), sin consultar en bucle: cada consulta te cuesta uso. No termines tu turno mientras haya trabajadores sin informe: si lo terminas, nadie te despierta cuando lleguen. Si vence la espera, vuelve a esperar. Que no haya mensajes no significa que el trabajador esté parado: un desarrollador puede pasar muchos minutos leyendo y probando sin escribir nada.
 5. Lee el informe completo (`worker-read`), libera el trabajador (`worker-release`) y, si era un worktree hijo, borra sus bases (`scripts/entorno-worktree.sh --borrar` dentro de él, si el proyecto lo tiene) y el worktree (`orca worktree rm`).
 
 Nunca hay dos trabajadores tocando el mismo worktree a la vez. Mientras el desarrollador trabaja, tú tampoco cambias código ni ejecutas pruebas en ese worktree.
 
+**Antes de dar por fallido a un trabajador** necesitas una prueba, no una sospecha: que la orquestación diga que ha terminado o fallado, o que su terminal muestre que el agente ha salido o que espera una respuesta que nunca llegará (un aviso de permisos, un error). Mira su estado y su terminal antes de decidir. Si sigue trabajando, espera. Si hay que sustituirlo, primero detenlo y libéralo (`worker-release`), confirma que ya no está activo y revisa `git status` del worktree: si dejó cambios a medias, decide con el usuario si se conservan o se descartan. Solo entonces lanzas al siguiente.
+
+**Si un trabajador pide aceptar el modo bypass** («Bypass Permissions», «Acceso total»), no lo aceptes nunca, ni lo pidas al usuario. Detenlo y dile al usuario que en Orca, Ajustes → host del servidor → Agentes, cambie los permisos a «Aprobar por mí» (y que quite `--dangerously-skip-permissions` de los argumentos de Claude). Mientras tanto, si el papel es de Claude, haz el encargo con tus propios subagentes.
+
 ### Si un modelo se queda sin uso
 
-Si un trabajador termina sin informe, o su salida dice que ha llegado a un límite de uso, de cuota o que no tiene sesión:
+Si un trabajador ha terminado de verdad (ver «Antes de dar por fallido a un trabajador») sin informe, o su salida dice que ha llegado a un límite de uso, de cuota o que no tiene sesión:
 
 1. Vuelve a resolver los papeles excluyéndolo: `pilotfish agents --json --without <agente>`.
 2. Relanza el mismo encargo con el nuevo modelo y díselo al usuario en una línea.
@@ -126,6 +130,6 @@ Usa `todo`, `in-progress`, `in-review` (PR abierta) y `completed` (PR mergeada).
 
 1. Comprueba que la PR está mergeada (`gh pr view <número> --json state`, o `glab mr view <número>`).
 2. Pon al día la copia principal como en «Al empezar un flujo: poner al día», incluida la preparación si cambió algún archivo de preparación.
-3. Borra la rama local de la PR si queda en la copia principal (`git branch -d <rama>`, que solo borra ramas ya integradas).
+3. Borra la rama local de la PR si queda en la copia principal: `git branch -d <rama>`. Si se niega porque la PR se integró con squash y en el paso 1 confirmaste que está mergeada, usa `git branch -D <rama>`: su contenido ya está en `main`. Si no te dejan, dale al usuario el comando.
 4. Estado del worktree a `completed`.
 5. Si el flujo se hizo en un worktree de tarea, dile al usuario que ya puede archivarlo en Orca: al archivarlo, Orca ejecuta el script de archivado de `orca.yaml` y se borran sus bases. No lo borres tú mientras trabajas dentro de él.
