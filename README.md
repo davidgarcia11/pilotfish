@@ -97,7 +97,7 @@ This links the `pilotfish` skill for your agents (`~/.claude/skills`, `~/.agents
 | "X is broken…" | [Fix](skills/pilotfish/flujos/arreglo.md) |
 | "Continue" | Handoff: resume a workflow another coordinator left halfway |
 
-**Update:** `pilotfish update`.
+**Update:** the coordinator pulls the latest Pilotfish at the start of every workflow and rereads its instructions if they changed. Run `pilotfish update` yourself when it asks (changes to permissions), or any time.
 
 ## 🎛️ Choosing models
 
