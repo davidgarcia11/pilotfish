@@ -97,15 +97,35 @@ PATH="$falso:$PATH" bash scripts/entorno-worktree.sh > /dev/null
 comprueba "la copia principal usa sus bases de siempre" "grep -q '/app\$' .env.worktree && grep -q 'app_test:app_test@127.0.0.1:5432/app_test\$' .env.worktree"
 comprueba "la copia principal conserva los puertos de .env" "! grep -qE '^(PORT|E2E_PORT)=' .env.worktree"
 comprueba "la copia principal no se puede borrar" "! PATH=\"$falso:\$PATH\" bash scripts/entorno-worktree.sh --borrar 2>/dev/null"
+preparar() { (cd "$1" && cp "$repo/.env" .env && PATH="$falso:$PATH" bash "$repo/scripts/entorno-worktree.sh" "${@:2}" > /dev/null); }
 git worktree add -q "$tmp/Tarea-Uno" -b tarea-uno
-cp .env "$tmp/Tarea-Uno/.env"
-(cd "$tmp/Tarea-Uno" && PATH="$falso:$PATH" bash "$repo/scripts/entorno-worktree.sh" > /dev/null)
-comprueba "un worktree tiene bases propias acabadas en _test" "grep -q '/app_tarea_uno\$' '$tmp/Tarea-Uno/.env.worktree' && grep -q '/app_tarea_uno_test\$' '$tmp/Tarea-Uno/.env.worktree'"
-comprueba "las bases de tests son del rol de tests" "grep -q 'CREATE DATABASE \"app_tarea_uno_test\" OWNER \"app_test\"' \"\$SQL_LOG\""
-comprueba "un worktree tiene puertos propios" "grep -qE '^PORT=3[0-9]+\$' '$tmp/Tarea-Uno/.env.worktree' && grep -qE '^E2E_PORT=4[0-9]+\$' '$tmp/Tarea-Uno/.env.worktree'"
-(cd "$tmp/Tarea-Uno" && PATH="$falso:$PATH" bash "$repo/scripts/entorno-worktree.sh" --borrar > /dev/null)
-comprueba "al borrar un worktree se borran solo sus bases" "grep -q 'DROP DATABASE IF EXISTS \"app_tarea_uno_test\"' \"\$SQL_LOG\" && ! grep -qE 'DROP DATABASE IF EXISTS \"app(_test)?\"' \"\$SQL_LOG\" && [ ! -f '$tmp/Tarea-Uno/.env.worktree' ]"
+preparar "$tmp/Tarea-Uno"
+wt="$tmp/Tarea-Uno/.env.worktree"
+comprueba "un worktree tiene bases propias acabadas en _test" "grep -qE '/app_wt_tarea_uno_[0-9a-f]{6}\$' '$wt' && grep -qE '/app_wt_tarea_uno_[0-9a-f]{6}_test\$' '$wt'"
+comprueba "las bases de tests son del rol de tests" "grep -qE 'CREATE DATABASE \"app_wt_tarea_uno_[0-9a-f]{6}_test\" OWNER \"app_test\"' \"\$SQL_LOG\""
+comprueba "un worktree tiene puertos propios" "grep -qE '^PORT=3[0-9]+\$' '$wt' && grep -qE '^E2E_PORT=4[0-9]+\$' '$wt'"
+preparar "$tmp/Tarea-Uno" --borrar
+comprueba "al borrar un worktree se borran solo sus bases" "grep -qE 'DROP DATABASE IF EXISTS \"app_wt_tarea_uno_[0-9a-f]{6}_test\"' \"\$SQL_LOG\" && ! grep -qE 'DROP DATABASE IF EXISTS \"app(_test)?\"' \"\$SQL_LOG\" && [ ! -f '$wt' ]"
 git worktree remove --force "$tmp/Tarea-Uno"
+
+: > "$SQL_LOG"
+git worktree add -q "$tmp/test" -b rama-test
+preparar "$tmp/test"; preparar "$tmp/test" --borrar
+comprueba "un worktree llamado test no toca la base de tests principal" "! grep -qE '(CREATE|DROP) DATABASE (IF EXISTS )?\"app(_test)?\"' \"\$SQL_LOG\""
+git worktree remove --force "$tmp/test"
+
+mkdir -p "$tmp/a" "$tmp/b"
+git worktree add -q "$tmp/a/tarea" -b tarea-a
+git worktree add -q "$tmp/b/tarea" -b tarea-b
+preparar "$tmp/a/tarea"; preparar "$tmp/b/tarea"
+comprueba "dos carpetas con el mismo nombre no comparten bases" "[ \"\$(grep ^DATABASE_URL '$tmp/a/tarea/.env.worktree')\" != \"\$(grep ^DATABASE_URL '$tmp/b/tarea/.env.worktree')\" ]"
+git worktree remove --force "$tmp/a/tarea"; git worktree remove --force "$tmp/b/tarea"
+
+: > "$SQL_LOG"
+PATH="$falso:$PATH" bash scripts/entorno-worktree.sh > /dev/null
+git worktree add -q "$tmp/otro" -b otro
+comprueba "con GIT_DIR heredado la copia principal sigue protegida" "! GIT_DIR=\"$repo/.git/worktrees/otro\" PATH=\"$falso:\$PATH\" bash scripts/entorno-worktree.sh --borrar 2>/dev/null && [ -f .env.worktree ] && ! grep -q DROP \"\$SQL_LOG\""
+git worktree remove --force "$tmp/otro"
 
 echo "elección de modelos"
 casa="$tmp/casa"; mkdir -p "$casa/.claude" "$casa/agentes"

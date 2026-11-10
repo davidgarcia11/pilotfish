@@ -92,7 +92,7 @@ Copia sin sobrescribir: hooks de git (secretos, formato de commits y firmas de I
 
 `scripts/entorno-worktree.sh` da a cada worktree sus bases y sus puertos en `.env.worktree`, que mise carga después de `.env`; la copia principal conserva los de `.env`.
 
-- **Bases:** la principal, `<POSTGRES_DB>` y `<POSTGRES_DB>_test`; cada worktree, `<POSTGRES_DB>_<worktree>` y `<POSTGRES_DB>_<worktree>_test`. Las de tests son del rol `<POSTGRES_DB>_test`. Pon en el código una guarda que impida ejecutar los tests si el nombre de la base no acaba en `_test`.
+- **Bases:** la principal, `<POSTGRES_DB>` y `<POSTGRES_DB>_test`; cada worktree, `<POSTGRES_DB>_wt_<carpeta>_<huella>` y la misma con `_test`. La huella sale de la ruta del worktree, para que ningún nombre de carpeta (`test`, dos carpetas iguales en sitios distintos) choque con la copia principal ni con otro worktree. `--borrar` solo borra bases con `_wt_`. Las de tests son del rol `<POSTGRES_DB>_test`. Pon en el código una guarda que impida ejecutar los tests si el nombre de la base no acaba en `_test`.
 - **Puertos:** el servidor de desarrollo lee `PORT` y los e2e `E2E_PORT`, con el valor de `.env` (o uno fijo) por defecto. Nunca un puerto escrito a fuego en la configuración de los e2e.
 - **Variables que dependen del puerto** (URL pública de la app, de autenticación, de callback…): rellena `variables_del_puerto` en el script para que sigan al puerto de cada worktree, con el mismo host que en `.env` (`localhost` y `127.0.0.1` son orígenes distintos para las librerías de autenticación). Si los e2e arrancan su propio servidor, que le pasen esas variables con su puerto.
 - **`setup`** ejecuta `mise run entorno` fuera de CI (`[ -n "$CI" ] || mise run entorno`), antes de instalar dependencias.

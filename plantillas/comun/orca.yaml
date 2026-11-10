@@ -2,10 +2,10 @@
 # Los archivos locales que no van en git (.env, AGENTS.md, CLAUDE.md, .claude/) los copia Orca según .worktreeinclude.
 scripts:
   setup: |
-    cd "$ORCA_WORKTREE_PATH"
+    cd "$ORCA_WORKTREE_PATH" || exit 1
     mise trust && mise install && mise run setup
   archive: |
-    cd "$ORCA_WORKTREE_PATH"
+    cd "$ORCA_WORKTREE_PATH" || exit 1
     if [ "$(git rev-parse --git-dir)" != "$(git rev-parse --git-common-dir)" ] && [ -x scripts/entorno-worktree.sh ]; then
       scripts/entorno-worktree.sh --borrar
     fi
