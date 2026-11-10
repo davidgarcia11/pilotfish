@@ -5,10 +5,14 @@
 # Uso: scripts/entorno-worktree.sh            prepara esta copia (la principal o un worktree)
 #      scripts/entorno-worktree.sh --borrar   borra las bases de este worktree (nunca las de la copia principal)
 #
-# Bases: la principal usa <POSTGRES_DB> y <POSTGRES_DB>_test; cada worktree, <POSTGRES_DB>_<worktree> y
-# <POSTGRES_DB>_<worktree>_test (el nombre de las de tests siempre acaba en _test). Las bases de tests son del rol
-# <POSTGRES_DB>_test, con contraseña igual a su nombre, que el script crea si no existe.
+# Bases: la principal usa <POSTGRES_DB> y <POSTGRES_DB>_test; cada worktree, <POSTGRES_DB>_wt_<carpeta>_<huella> y
+# <POSTGRES_DB>_wt_<carpeta>_<huella>_test, donde la huella sale de la ruta completa del worktree. Así ningún worktree
+# puede coincidir con la copia principal ni con otro worktree, se llame como se llame su carpeta. El nombre de las de
+# tests siempre acaba en _test. Las bases de tests son del rol <POSTGRES_DB>_test, con contraseña igual a su nombre,
+# que el script crea si no existe.
 set -euo pipefail
+# Un GIT_DIR heredado haría creer al script que está en otro repositorio o en otra copia.
+unset GIT_DIR GIT_WORK_TREE GIT_COMMON_DIR GIT_INDEX_FILE
 cd "$(git rev-parse --show-toplevel)"
 
 # Variables del proyecto que dependen del puerto de la app en un worktree: URL pública, de autenticación,
@@ -24,15 +28,19 @@ usuario=$(leer POSTGRES_USER); clave=$(leer POSTGRES_PASSWORD); base=$(leer POST
 puerto_bd=$(leer POSTGRES_PORT); puerto_bd=${puerto_bd:-5432}
 : "${usuario:?Define POSTGRES_USER en .env}" "${clave:?Define POSTGRES_PASSWORD en .env}" "${base:?Define POSTGRES_DB en .env}"
 
-if [ "$(git rev-parse --git-dir)" = "$(git rev-parse --git-common-dir)" ]; then
-  slug=principal; sufijo=""; desplazamiento=0
+aqui=$(pwd -P)
+principal=$(cd "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")" && pwd -P)
+if [ "$aqui" = "$principal" ] || [ "$(git rev-parse --git-dir)" = "$(git rev-parse --git-common-dir)" ]; then
+  slug=principal; desplazamiento=0
+  bd_dev="$base"
 else
-  slug=$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9\n' '_' | cut -c1-30)
-  sufijo="_$slug"
-  desplazamiento=$(( $(printf '%s' "$PWD" | cksum | cut -d' ' -f1) % 899 + 1 ))
+  carpeta=$(basename "$aqui" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9\n' '_' | cut -c1-20)
+  numero=$(printf '%s' "$aqui" | cksum | cut -d' ' -f1)
+  slug="${carpeta}_$(printf '%06x' $((numero % 16777216)))"
+  desplazamiento=$((numero % 899 + 1))
+  bd_dev="${base}_wt_${slug}"
 fi
-bd_dev="${base}${sufijo}"
-bd_test="${base}${sufijo}_test"
+bd_test="${bd_dev}_test"
 rol_test="${base}_test"
 
 psql_admin() { docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$usuario" -d "$base" -tAc "$1"; }
@@ -43,6 +51,7 @@ fi
 
 if [ "${1:-}" = "--borrar" ]; then
   [ "$slug" = principal ] && { echo "No se borran las bases de la copia principal." >&2; exit 1; }
+  case "$bd_dev" in "${base}_wt_"?*) ;; *) echo "Nombre de base inesperado: $bd_dev. No se borra nada." >&2; exit 1 ;; esac
   for bd in "$bd_dev" "$bd_test"; do psql_admin "DROP DATABASE IF EXISTS \"$bd\" WITH (FORCE)"; done
   rm -f .env.worktree
   echo "Bases de $slug borradas."
