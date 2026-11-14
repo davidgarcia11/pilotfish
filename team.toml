@@ -35,6 +35,12 @@ default = "medium"
 # qa = "low"
 
 [rules]
+# How many auditors work on each flow:
+#   "ask"       the coordinator asks at the start of every flow (default),
+#   "full"      QA, reviewer, bug hunter and security, always,
+#   "necessary" QA and reviewer; bug hunter and security when the change calls for them,
+#   "minimal"   no auditors: the coordinator reviews the diff itself.
+team_mode = "ask"
 # When no model is left in a role's tier:
 #   "pause"     stop and tell the user (recommended for sensitive roles),
 #   "downgrade" use the next tier down (strong → standard → budget).

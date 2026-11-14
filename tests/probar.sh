@@ -174,6 +174,13 @@ printf '[tiers]\nstrong = ["claude:opus"]\n[rules]\nwhen_tier_exhausted = "downg
 comprueba "Claude sin uso y «downgrade»: seguridad baja al nivel estándar" "[ \"\$(eleccion security --without claude)\" = opencode:deepseek/deepseek-v4-pro ]"
 printf '[tiers]\nbudget = ["opencode:deepseek/deepseek-chat", "claude:sonnet"]\n' > "$casa/team.toml"
 comprueba "salta un modelo que OpenCode no ofrece" "[ \"\$(eleccion developer)\" = claude:sonnet ]"
+modo() { HOME="$casa" PATH="$casa/agentes:/usr/bin:/bin" PILOTFISH_CONFIG="$casa/team.toml" python3 -I "$raiz/lib/team.py" --root "$raiz" --json | python3 -c "import json,sys; print(json.load(sys.stdin)['team_mode'])"; }
+: > "$casa/team.toml"
+comprueba "por defecto el coordinador pregunta el modo de equipo" "[ \"\$(modo)\" = ask ]"
+printf '[rules]\nteam_mode = "minimal"\n' > "$casa/team.toml"
+comprueba "el modo de equipo se puede fijar en la configuración" "[ \"\$(modo)\" = minimal ]"
+printf '[rules]\nteam_mode = "todo"\n' > "$casa/team.toml"
+comprueba "rechaza un modo de equipo que no existe" "! modo 2>/dev/null"
 printf '[roles]\nsecurity = ["claude:opus"]\n' > "$casa/team.toml"
 comprueba "un papel con lista propia la respeta" "[ \"\$(eleccion security --without claude)\" = paused ]"
 

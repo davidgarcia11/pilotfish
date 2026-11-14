@@ -29,15 +29,14 @@ pilotfish agents --json
 - `NNN`: siguiente número de tres cifras tras el mayor entre `docs/specs/` y las ramas `feat/NNN-*` locales y remotas, para que dos tareas en paralelo no repitan número. `nombre-corto`: 2-4 palabras en kebab-case.
 - **Copia principal:** `git switch main && git pull --ff-only && git switch -c feat/NNN-nombre-corto`.
 - **Worktree de Orca:** `main` está ocupada por la copia principal, no cambies a ella. Si la rama actual no tiene commits propios (`git log origin/main..HEAD` vacío), `git reset --hard origin/main` y `git branch -m feat/NNN-nombre-corto`. Si ya tiene commits, para y pregunta.
-- **Equipo:** di al usuario en una línea qué modelo hará cada papel.
-- **Modo.** Propón el ligero solo si se cumple todo: sin cambios en el modelo de datos, sin dependencias nuevas, sin tocar autenticación, permisos, pagos ni datos personales, sin cambiar contratos públicos y unas 3 tareas como máximo. En otro caso, completo. El usuario confirma.
+- **Equipo:** elige con el usuario el modo de equipo («Modo de equipo» en `SKILL.md`).
+- **Modo de especificación.** Propón el ligero solo si se cumple todo: sin cambios en el modelo de datos, sin dependencias nuevas, sin tocar autenticación, permisos, pagos ni datos personales, sin cambiar contratos públicos y unas 3 tareas como máximo. En otro caso, completo. El usuario confirma.
 
 | | Completo | Ligero |
 |---|---|---|
 | Especificación | completa | problema, objetivo, criterios y fuera de alcance |
 | Plan | método completo de `guias/diseno-tecnico.md` | breve |
 | Aprobaciones | especificación y plan por separado | una sola, conjunta |
-| Auditorías | QA y revisor, más seguridad y cazabugs según riesgo | QA (y seguridad si toca entradas o datos) |
 
 ## 2. Especificación
 
@@ -69,12 +68,12 @@ Tras cada bloque comprueba tú: `git log --oneline origin/main..HEAD`, tareas ma
 
 ## 5. Auditorías
 
-Elige los auditores con la especificación, el plan y el diff (`git diff --stat origin/main...HEAD`):
+Según el modo de equipo: en el **completo**, los cuatro; en el **mínimo**, ninguno (haz tú la revisión que describe `SKILL.md` y salta a «6. Correcciones» con tus hallazgos); en el **necesario**, elige con la especificación, el plan y el diff (`git diff --stat origin/main...HEAD`):
 
 | Papel | Cuándo |
 |---|---|
 | `qa` | Siempre |
-| `reviewer` | Siempre en modo completo |
+| `reviewer` | Siempre |
 | `security` | Si toca autenticación, sesiones, permisos, datos personales, pagos, secretos o configuración, dependencias nuevas, subida de archivos, servicios externos, o entradas de usuario nuevas que llegan a base de datos, HTML, shell o archivos. En caso de duda, lánzalo |
 | `bug_hunter` | Si hay reglas de negocio con estados, cálculos (importes, fechas, zonas horarias), concurrencia o tareas asíncronas, integraciones externas, migraciones de datos o parseo de formatos |
 

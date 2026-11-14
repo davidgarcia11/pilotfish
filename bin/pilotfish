@@ -139,8 +139,11 @@ config() {
 # default = "medium"
 # qa = "low"
 #
+# Team mode: how many auditors work on each flow. "ask" (asks you at the start), "full",
+# "necessary" (QA and reviewer, plus bug hunter and security by risk) or "minimal" (the coordinator reviews).
 # What to do when no model of a role's tier is available: "pause" (stop and tell you) or "downgrade".
 # [rules]
+# team_mode = "necessary"
 # when_tier_exhausted = "downgrade"
 # reviewer_different_provider = true
 FIN
