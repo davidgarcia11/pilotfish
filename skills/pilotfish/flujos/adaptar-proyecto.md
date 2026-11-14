@@ -65,6 +65,8 @@ Pide aprobación explícita e itera hasta tenerla.
 
 Antes de nada: secretos rotados, copia completa (`git clone --mirror`) y aviso a quien tenga el repositorio clonado. `git filter-repo` en una copia, enseña el resultado y pide confirmación para el force push. Nunca en la misma PR que la adaptación.
 
+Si el proyecto aún no tiene `.pilotfish.toml`, haz con el usuario el paso «3b. Equipo del proyecto» de `flujos/nuevo-proyecto.md`.
+
 ## Cierre
 
 Resume en 8 líneas como máximo: qué tenía, qué cambia, URL de la PR, deuda pendiente y riesgos abiertos. Termina con lo que el usuario tiene que hacer en Orca, como al final de `flujos/nuevo-proyecto.md`, y con «Al terminar un flujo» de `SKILL.md`.

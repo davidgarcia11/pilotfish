@@ -41,6 +41,8 @@ Si el proyecto tiene base de datos y los tests usan la de desarrollo, o no puede
 
 Si falta `orca.yaml` y el usuario tiene scripts de preparación o archivado en los ajustes de Orca, al cerrar dile que los borre para que mande el de `orca.yaml`.
 
+Si en la copia principal no hay `.pilotfish.toml`, ofrece al usuario el paso «3b. Equipo del proyecto» de `flujos/nuevo-proyecto.md` para elegir los modelos de este proyecto.
+
 Comprueba además que `git config core.hooksPath` es `.githooks` y que ningún archivo de agentes está en git.
 
 ## 4. Proponer

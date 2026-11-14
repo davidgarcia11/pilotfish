@@ -181,6 +181,29 @@ printf '[rules]\nteam_mode = "minimal"\n' > "$casa/team.toml"
 comprueba "el modo de equipo se puede fijar en la configuración" "[ \"\$(modo)\" = minimal ]"
 printf '[rules]\nteam_mode = "todo"\n' > "$casa/team.toml"
 comprueba "rechaza un modo de equipo que no existe" "! modo 2>/dev/null"
+echo "equipo por proyecto"
+proyecto="$tmp/proyecto"; git init -q -b main "$proyecto"
+pf() { (cd "$proyecto" && HOME="$casa" PATH="$casa/agentes:/usr/bin:/bin" PILOTFISH_CONFIG="$casa/team.toml" python3 -I "$raiz/lib/team.py" --root "$raiz" "$@"); }
+pf_rol() { pf --json | python3 -c "import json,sys; d=json.load(sys.stdin)['roles']['$1']; print(d['agent']+':'+d['model'])"; }
+: > "$casa/team.toml"
+comprueba "detecta los modelos de OpenCode de cada proveedor conectado" "pf --detect --json | python3 -c \"import json,sys; d=json.load(sys.stdin); sys.exit(0 if 'opencode:deepseek/deepseek-v4-pro' in d['available'] and 'claude:opus' in d['available'] else 1)\""
+comprueba "la vista previa de un punto de partida no guarda nada" "pf --preset ahorro > /dev/null && [ ! -f '$proyecto/.pilotfish.toml' ]"
+pf --save --preset saving > /dev/null
+comprueba "aplicar un punto de partida lo guarda en el proyecto" "grep -q 'reviewer = \"budget\"' '$proyecto/.pilotfish.toml' && [ \"\$(pf_rol plan)\" = claude:sonnet ]"
+pf --save --role security=claude:opus,opencode:deepseek/deepseek-v4-pro --mode minimal --effort qa=low > /dev/null
+comprueba "cambiar un papel conserva el resto" "[ \"\$(pf_rol security)\" = claude:opus ] && grep -q 'reviewer = \"budget\"' '$proyecto/.pilotfish.toml'"
+comprueba "guarda el modo de equipo y el esfuerzo" "pf --json | python3 -c \"import json,sys; d=json.load(sys.stdin); sys.exit(0 if d['team_mode']=='minimal' and d['roles']['qa']['effort']=='low' else 1)\""
+printf '[roles]\nplan = "budget"\n' > "$casa/team.toml"
+comprueba "el proyecto manda sobre las preferencias del usuario" "[ \"\$(pf_rol plan)\" = claude:sonnet ]"
+comprueba "rechaza un papel que no existe" "! pf --save --role arquitecto=strong 2>/dev/null"
+comprueba "rechaza un modelo sin agente" "! pf --save --role qa=deepseek-flash 2>/dev/null"
+mkdir -p "$proyecto/sub" && git -C "$proyecto" commit -q --allow-empty -m "chore: inicio"
+git -C "$proyecto" worktree add -q "$tmp/proyecto-wt" -b otra
+comprueba "un worktree usa la configuración de su copia principal" "[ \"\$( (cd '$tmp/proyecto-wt' && HOME='$casa' PATH='$casa/agentes:/usr/bin:/bin' PILOTFISH_CONFIG='$casa/team.toml' python3 -I '$raiz/lib/team.py' --root '$raiz' --json) | python3 -c \"import json,sys; print(json.load(sys.stdin)['team_mode'])\")\" = minimal ]"
+rm "$proyecto/.pilotfish.toml"
+printf '3\n\nnecessary\n' | pf --interactive > /dev/null
+comprueba "el asistente guarda el punto de partida y el modo elegidos" "grep -q 'reviewer = \"budget\"' '$proyecto/.pilotfish.toml' && grep -q 'team_mode = \"necessary\"' '$proyecto/.pilotfish.toml'"
+
 printf '[roles]\nsecurity = ["claude:opus"]\n' > "$casa/team.toml"
 comprueba "un papel con lista propia la respeta" "[ \"\$(eleccion security --without claude)\" = paused ]"
 

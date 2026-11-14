@@ -82,6 +82,15 @@ pilotfish scaffold --forge github   # o gitlab; --services y --runbook si el pla
 
 Copia sin sobrescribir: hooks de git (secretos, formato de commits y firmas de IA), `scripts/comprobar-commits.sh`, `cliff.toml`, CI, plantilla de PR/MR, `docs/`, `AGENTS.md`, `CLAUDE.md`, `.claude/` (permisos y hook que bloquea commits en `main`), `.worktreeinclude`, `orca.yaml` (scripts de preparación y archivado de cada worktree), y con `--services` el `compose.yaml` y `scripts/entorno-worktree.sh`. Configura `core.hooksPath`, la exclusión local y el `.gitignore`. Lee su salida y resuelve lo que indique.
 
+### 3b. Equipo del proyecto
+
+Con el repositorio git y la base del estándar ya creados (`.pilotfish.toml` queda fuera de git), elige con el usuario qué modelos hará cada papel en este proyecto:
+
+1. `pilotfish detect` y resume en pocas líneas qué hay disponible en la máquina (agentes, modelos y otros agentes instalados).
+2. Enseña los tres puntos de partida con lo que daría cada uno (`pilotfish agents --preset quality`, `balanced` y `saving`): **calidad** (lo más potente primero, también para desarrollar), **equilibrado** (los valores por defecto) y **ahorro** (lo barato primero; lo fuerte solo donde un fallo cuesta más).
+3. Pregunta cuál quiere, con preguntas de opciones si tu herramienta las tiene, y después si quiere cambiar algún papel en concreto. Pregunta también si quiere fijar un modo de equipo o que se lo preguntes en cada flujo.
+4. Guárdalo: `pilotfish set --preset <nombre> [--role <papel>=<modelos>]… [--mode <modo>]`, y enseña el resultado.
+
 ### 4. Rellenar con el plan aprobado
 
 - `mise.toml`: las tareas de `$(pilotfish path)/plantillas/tareas/<stack>.toml` (no las copia `pilotfish scaffold`: adáptalas al proyecto), más `version.toml` y, con servicios, `servicios.toml`. `check` incluye lint, formato, tipos, tests, build, `gitleaks` y `osv-scanner`. Con servicios, `setup` termina con `mise run entorno`.
