@@ -106,7 +106,7 @@ Cada papel pide un **nivel**, y cada nivel es una lista de modelos por orden de 
 ```toml
 [tiers]
 strong   = ["claude:opus", "codex:gpt-6-astra", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
-standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
+standard = ["claude:sonnet", "codex:gpt-6.1-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
 budget   = ["opencode:deepseek/deepseek-flash", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
 
 [roles]
@@ -124,7 +124,7 @@ reviewer_different_provider = true
 ```
 
 - **Gana el primero disponible.** Se salta un modelo si su agente no está instalado, no tiene la sesión iniciada, no ofrece ese modelo o se ha quedado sin uso. Si mañana instalas Codex, entra solo: ya está en las listas.
-- **Tus cambios** van en `~/.config/pilotfish/team.toml` (lo crea `pilotfish config`). Pon solo lo que cambies; las actualizaciones nunca lo tocan.
+- **Tus cambios** van en `~/.config/pilotfish/team.toml` (lo crea `pilotfish config --template`). Pon solo lo que cambies; las actualizaciones nunca lo tocan.
 - **Un papel puede tener su propia lista** en vez de un nivel, por ejemplo `security = ["claude:opus", "codex:gpt-6-astra"]`.
 - **Cambios puntuales:** dile al coordinador «que la seguridad la haga Codex en esta» y lo aplica solo a esa tarea.
 - **Esfuerzo por papel:** `[effort]` fija cuánto piensa cada trabajador (`low`, `medium`, `high`); los papeles que no pongas usan `default` (`medium`). Cuenta en los trabajadores de Claude, y más esfuerzo es más consumo. El esfuerzo del coordinador es el de la pestaña que abres tú en Orca.
@@ -140,7 +140,7 @@ developer = ["opencode:deepseek/deepseek-v4-pro", "opencode:deepseek/deepseek-fl
 qa = "low"
 ```
 
-Cada línea pertenece a la `[sección]` que tiene encima: `qa = "low"` debajo de `[roles]` significaría «QA usa un nivel llamado low». La plantilla comentada que crea `pilotfish config` lista todas las opciones.
+Cada línea pertenece a la `[sección]` que tiene encima: `qa = "low"` debajo de `[roles]` significaría «QA usa un nivel llamado low». La plantilla comentada que crea `pilotfish config --template` lista todas las opciones.
 
 Para ver qué usará cada papel ahora mismo:
 
@@ -154,6 +154,20 @@ qa           budget    opencode:deepseek/deepseek-flash           claude:sonnet
 reviewer     standard  claude:sonnet                              —
 bug_hunter   strong    claude:opus                                —
 security     strong    claude:opus                                —
+```
+
+### Por proyecto
+
+Cada proyecto puede tener su propio equipo, guardado en `.pilotfish.toml` en su copia principal (local, fuera de git). Capas, de menos a más importante: los valores de Pilotfish, tus preferencias y las del proyecto.
+
+- **Al empezar un proyecto**, el coordinador detecta lo que hay en la máquina y te ofrece tres puntos de partida: **calidad** (lo más potente primero, también para desarrollar), **equilibrado** (los valores por defecto) y **ahorro** (lo barato primero; lo fuerte solo donde un fallo cuesta más). Después cambias los papeles que quieras.
+- **Cámbialo cuando quieras** pidiéndoselo al coordinador («a partir de ahora el revisor es Codex»), con el asistente de terminal `pilotfish config` o directamente:
+
+```bash
+pilotfish detect                          # todos los modelos que se pueden usar en esta máquina
+pilotfish agents --preset saving          # vista previa de un punto de partida
+pilotfish set --preset saving             # aplicarlo a este proyecto
+pilotfish set --role reviewer=codex:gpt-6.1-sol,claude:sonnet --mode necessary --effort qa=low
 ```
 
 ## 🎚️ Modos de equipo

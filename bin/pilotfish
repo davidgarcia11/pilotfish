@@ -3,9 +3,12 @@
 #
 #   pilotfish install            install the skill for this machine's agents and the pilotfish command
 #   pilotfish update             pull the latest version and reinstall
-#   pilotfish agents [--json] [--without claude,...]
-#                                which model plays each role with what is available now
-#   pilotfish config             create your own settings (~/.config/pilotfish/team.toml)
+#   pilotfish agents [--json] [--without claude,...] [--preset NAME]
+#                                which model plays each role with what is available now (or with a preset)
+#   pilotfish detect [--json]    every model usable on this machine
+#   pilotfish config [--template] in a project: assistant to choose its team; elsewhere or with --template: create your settings
+#   pilotfish set [--preset NAME] [--role ROLE=MODELS] [--mode MODE] [--effort ROLE=LEVEL]
+#                                change the current project's team (.pilotfish.toml)
 #   pilotfish path               print the Pilotfish folder (templates, defaults)
 #   pilotfish scaffold --forge github|gitlab [--services] [--runbook] [--dir PATH]
 #                                add the project baseline to a git repository, never overwriting
@@ -200,14 +203,14 @@ scaffold() {
     for line in "$@"; do grep -qxF -- "$line" "$file" || printf '%s\n' "$line" >> "$file"; done
   }
   # Local only: agent instructions and settings.
-  add_lines "$(git rev-parse --git-path info/exclude)" AGENTS.md CLAUDE.md CLAUDE.local.md .claude/ .worktreeinclude
+  add_lines "$(git rev-parse --git-path info/exclude)" AGENTS.md CLAUDE.md CLAUDE.local.md .claude/ .worktreeinclude .pilotfish.toml
   add_lines .gitignore ".env*" "!.env.example" ".mise/" "mise.local.toml" ".DS_Store"
 
   echo "Baseline added (forge: $forge)."
   [ "${#created[@]}" -gt 0 ] && { echo "Created:"; printf '  %s\n' "${created[@]}"; }
   [ "${#skipped[@]}" -gt 0 ] && { echo "Skipped because they already exist (review them by hand):"; printf '  %s\n' "${skipped[@]}"; }
   local tracked
-  tracked=$(git ls-files -- AGENTS.md CLAUDE.md CLAUDE.local.md .claude .worktreeinclude 2>/dev/null || true)
+  tracked=$(git ls-files -- AGENTS.md CLAUDE.md CLAUDE.local.md .claude .worktreeinclude .pilotfish.toml 2>/dev/null || true)
   if [ -n "$tracked" ]; then
     echo "Warning: these files are tracked by git and should leave the repository (git rm --cached):"
     printf '%s\n' "$tracked" | sed 's/^/  /'
@@ -224,7 +227,9 @@ case "${1:-}" in
   install) install ;;
   update) update ;;
   agents) shift; agents "$@" ;;
-  config) config ;;
+  detect) shift; agents --detect "$@" ;;
+  set) shift; agents --save "$@" ;;
+  config) shift; if git rev-parse --git-dir > /dev/null 2>&1 && [ "${1:-}" != --template ]; then agents --interactive; else config; fi ;;
   path) echo "$root" ;;
   scaffold) shift; scaffold "$@" ;;
   -h|--help|"") usage ;;

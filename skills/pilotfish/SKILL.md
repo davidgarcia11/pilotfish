@@ -101,6 +101,17 @@ pilotfish agents --json --without claude      # lo mismo, excluyendo lo que se h
 - Al empezar un flujo, ejecútalo y di al usuario en una línea qué modelo hará cada papel.
 - Si un papel sale con `"status": "paused"`, no hay ningún modelo disponible para él: no lances ese papel; dile al usuario cuál y por qué, y espera.
 - Si el usuario pide otro modelo para un papel en esta tarea («que la seguridad la haga Codex»), úsalo solo para esta tarea.
+- La configuración tiene tres capas: los valores de Pilotfish, las preferencias del usuario (`~/.config/pilotfish/team.toml`) y las del proyecto (`.pilotfish.toml` en la copia principal, local y fuera de git). Si el usuario pide un cambio **para el proyecto** («a partir de ahora el revisor es Codex», «pon el modo ahorro», «pregúntame otra vez las prioridades»), guárdalo y enséñale cómo queda:
+
+  ```bash
+  pilotfish detect                                   # qué modelos hay en esta máquina
+  pilotfish agents --preset saving                   # vista previa de un punto de partida: quality, balanced, saving
+  pilotfish set --preset saving                      # aplicarlo al proyecto
+  pilotfish set --role reviewer=codex:gpt-6.1-sol,claude:sonnet   # un papel: nivel o lista por prioridad
+  pilotfish set --mode necessary --effort qa=low     # modo de equipo y esfuerzo
+  ```
+
+  Al usuario, los puntos de partida se llaman calidad, equilibrado y ahorro. En la terminal tiene el asistente `pilotfish config`.
 - Para tus propias fases: si `plan` y `coordinate` son modelos distintos y tú eres el agente de ambos, al aprobarse el plan sugiere al usuario cambiar de modelo para la fase de coordinación (en Claude Code, `/model <modelo>`). Es solo una sugerencia para ahorrar.
 
 ### Cómo lanzar un trabajador
