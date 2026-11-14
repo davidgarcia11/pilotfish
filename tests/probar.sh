@@ -197,7 +197,7 @@ printf '[roles]\nplan = "budget"\n' > "$casa/team.toml"
 comprueba "el proyecto manda sobre las preferencias del usuario" "[ \"\$(pf_rol plan)\" = claude:sonnet ]"
 comprueba "rechaza un papel que no existe" "! pf --save --role arquitecto=strong 2>/dev/null"
 comprueba "rechaza un modelo sin agente" "! pf --save --role qa=deepseek-flash 2>/dev/null"
-mkdir -p "$proyecto/sub" && git -C "$proyecto" commit -q --allow-empty -m "chore: inicio"
+git -C "$proyecto" -c user.name=Prueba -c user.email=prueba@example.com commit -q --allow-empty --no-verify -m "chore: inicio"
 git -C "$proyecto" worktree add -q "$tmp/proyecto-wt" -b otra
 comprueba "un worktree usa la configuración de su copia principal" "[ \"\$( (cd '$tmp/proyecto-wt' && HOME='$casa' PATH='$casa/agentes:/usr/bin:/bin' PILOTFISH_CONFIG='$casa/team.toml' python3 -I '$raiz/lib/team.py' --root '$raiz' --json) | python3 -c \"import json,sys; print(json.load(sys.stdin)['team_mode'])\")\" = minimal ]"
 rm "$proyecto/.pilotfish.toml"
