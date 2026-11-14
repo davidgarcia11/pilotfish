@@ -156,6 +156,18 @@ bug_hunter   strong    claude:opus                                —
 security     strong    claude:opus                                —
 ```
 
+## 🎚️ Modos de equipo
+
+Al empezar cada flujo, el coordinador te pregunta cuántos auditores quieres y te dice quién trabajaría en cada caso:
+
+| Modo | Auditores |
+|---|---|
+| **Completo** | QA, revisor, cazabugs y seguridad, siempre |
+| **Necesario** | QA y revisor; cazabugs y seguridad cuando el cambio lo pide |
+| **Mínimo** | Ninguno: el coordinador revisa él mismo el diff y pasa las comprobaciones |
+
+Puedes añadir o quitar un auditor en cualquier momento («pasa el cazabugs por esto», «sin revisión de seguridad esta vez»). Para que no pregunte, pon un modo por defecto con `team_mode` en `[rules]` de tu configuración: `"full"`, `"necessary"` o `"minimal"` (por defecto es `"ask"`). Los hooks, el CI, la base de tests separada y tu merge se aplican en todos los modos.
+
 ## 🔁 Reservas y relevo
 
 - **Trabajadores:** si uno se para porque su modelo ha llegado a un límite de uso, el coordinador vuelve a calcular el equipo sin él (`pilotfish agents --without claude`) y relanza el mismo encargo con el siguiente modelo.

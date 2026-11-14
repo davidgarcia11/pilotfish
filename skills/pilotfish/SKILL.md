@@ -29,11 +29,25 @@ Si dudas entre dos, pregunta con una sola frase. Si lo que pide es trivial (una 
 - **Idioma:** habla con el usuario en su idioma y escribe la especificación, el plan, los commits y la PR en el idioma del proyecto (el de `AGENTS.md` y el código existente; si no hay, el del usuario).
 - **El usuario aprueba** la especificación y el plan (y en un arreglo, el diagnóstico). Sin aprobación explícita no se escribe código.
 - **Nunca haces merge.** Todo flujo termina en una PR que mergea el usuario. Lo que viene después del merge (poner al día, preparar, cerrar el worktree) sí es tuyo: «Al terminar un flujo».
-- **Ninguna PR sin revisión.** Antes de abrir cualquier PR, también en los flujos de actualizar y adaptar, pasa al menos el revisor (`reviewer`); el cazabugs (`bug_hunter`) si cambian scripts, CI, hooks o configuración; y seguridad (`security`) si tocan permisos, secretos o autenticación. Se lanzan como en «Cómo lanzar un trabajador» y sus hallazgos graves se corrigen antes de la PR.
+- **Ninguna PR sin revisión.** Antes de abrir cualquier PR, también en los flujos de actualizar y adaptar, se audita según el modo de equipo (sección «Modo de equipo»). En los modos completo y necesario: al menos el revisor (`reviewer`); el cazabugs (`bug_hunter`) si cambian scripts, CI, hooks o configuración; y seguridad (`security`) si tocan permisos, secretos o autenticación. En el mínimo, la revisión la haces tú. Los hallazgos graves se corrigen antes de la PR.
 - **Autoría:** nada en commits, PR, código ni documentos menciona a ningún asistente, modelo ni herramienta de IA. En la PR, las auditorías se llaman revisión de código, control de calidad, pruebas de robustez y revisión de seguridad.
 - **Los trabajadores no ven esta conversación** ni hablan con el usuario: cada encargo lleva todo lo que necesitan. Sus preguntas las contestas tú o se las haces tú al usuario.
 - **Instrucciones del proyecto:** `AGENTS.md` (local, fuera de git). Si en la copia principal falta, el proyecto no sigue el estándar: propón `flujos/adaptar-proyecto.md`.
 - **Archivos locales en un worktree:** `AGENTS.md`, `CLAUDE.md` y `.claude/` llegan a cada worktree al crearlo. Cada cambio aprobado en ellos se aplica también en la copia principal (`dirname "$(git rev-parse --path-format=absolute --git-common-dir)"`), editando esas líneas, nunca copiando el archivo entero. Si la ruta de la copia principal y la del worktree son el mismo archivo (enlace), aplícalo una sola vez.
+
+## Modo de equipo
+
+Cuántos auditores trabajan en el flujo. Lo eliges con el usuario al empezar, después de «Al empezar un flujo: poner al día» y de preparar la rama:
+
+| Modo | Auditores |
+|---|---|
+| **Completo** (`full`) | QA, revisor, cazabugs y seguridad, siempre |
+| **Necesario** (`necessary`) | QA y revisor; cazabugs y seguridad cuando el cambio lo pide (criterios de cada flujo) |
+| **Mínimo** (`minimal`) | Ninguno. Revisas tú el diff con la lista de `papeles/reviewer.md`, compruebas que cada criterio de aceptación tiene su test y pasas `mise run check`. En la PR lo indicas como «revisión del coordinador» |
+
+- Lee `team_mode` de `pilotfish agents --json`. Si es `ask`, pregunta al usuario qué modo quiere, con preguntas de opciones si tu herramienta las tiene. En cada opción, di qué papeles trabajarían y con qué modelo, y cuáles añadirían los criterios de riesgo en este cambio. Si es otro valor, úsalo y díselo en una línea.
+- **A la carta:** el usuario puede añadir o quitar un auditor en cualquier momento («pasa el cazabugs», «sin seguridad en esta», «que revise Codex»). Aplícalo solo a ese flujo.
+- En todos los modos siguen igual los hooks, el CI, la base de tests separada y el merge del usuario.
 
 ## Al empezar un flujo: poner al día
 

@@ -46,7 +46,7 @@ Comprueba tú que el test existe y que su motivo de fallo en rojo coincide con e
 
 ## 4. Auditorías y correcciones
 
-Lánzalos a la vez, cada uno en su worktree hijo (`--worktree new-child`):
+Según el modo de equipo de `SKILL.md`: en el **completo**, los cuatro; en el **mínimo**, ninguno (revisas tú, y compruebas que revertir la corrección hace fallar el test nuevo); en el **necesario**, según esta tabla. Lánzalos a la vez, cada uno en su worktree hijo (`--worktree new-child`):
 
 | Papel | Cuándo |
 |---|---|

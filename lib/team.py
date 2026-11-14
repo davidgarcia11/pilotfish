@@ -10,6 +10,7 @@ import tomllib
 from pathlib import Path
 
 TIER_ORDER = ["strong", "standard", "budget"]
+TEAM_MODES = ["ask", "full", "necessary", "minimal"]
 ROLES = ["plan", "coordinate", "developer", "qa", "reviewer", "bug_hunter", "security"]
 
 # Signs that an agent is logged in. Unknown agents only need to be installed.
@@ -168,11 +169,15 @@ def resolve(config: dict, without: set[str]) -> dict:
             "effort": effort.get(role, effort.get("default", "medium")),
             "fallbacks": [e for e in free if e != chosen],
         }
-    return {"roles": roles, "unavailable": reasons}
+    team_mode = rules.get("team_mode", "ask")
+    if team_mode not in TEAM_MODES:
+        raise SystemExit(f"team_mode «{team_mode}» is not one of: {', '.join(TEAM_MODES)}.")
+    return {"team_mode": team_mode, "roles": roles, "unavailable": reasons}
 
 
 def show(result: dict, paths: list[str]) -> None:
     print("Config: " + " + ".join(paths))
+    print(f"Team mode: {result['team_mode']}")
     print()
     print(f"{'Role':<12} {'Tier':<9} {'Uses':<42} Fallbacks")
     for role, data in result["roles"].items():

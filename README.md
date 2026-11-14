@@ -156,6 +156,18 @@ bug_hunter   strong    claude:opus                                —
 security     strong    claude:opus                                —
 ```
 
+## 🎚️ Team modes
+
+At the start of every workflow the coordinator asks how many auditors you want, and tells you who would work in each case:
+
+| Mode | Auditors |
+|---|---|
+| **Full** | QA, reviewer, bug hunter and security, always |
+| **Necessary** | QA and reviewer; bug hunter and security when the change calls for them |
+| **Minimal** | None: the coordinator reviews the diff itself and runs the checks |
+
+Add or drop an auditor at any moment ("run the bug hunter on this", "no security review this time"). To skip the question, set a default with `team_mode` under `[rules]` in your config: `"full"`, `"necessary"` or `"minimal"` (`"ask"` is the default). Hooks, CI, the separate test database and your merge apply in every mode.
+
 ## 🔁 Fallbacks and handoff
 
 - **Workers:** if a worker stops because its model hit a usage limit, the coordinator re-resolves the team without it (`pilotfish agents --without claude`) and relaunches the same brief on the next model.
