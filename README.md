@@ -106,7 +106,7 @@ Roles ask for a **tier**; each tier is a list of models in order of preference (
 ```toml
 [tiers]
 strong   = ["claude:opus", "codex:gpt-6-astra", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
-standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
+standard = ["claude:sonnet", "codex:gpt-6.1-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
 budget   = ["opencode:deepseek/deepseek-flash", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
 
 [roles]
@@ -124,7 +124,7 @@ reviewer_different_provider = true
 ```
 
 - **The first available model wins.** A model is skipped if its agent isn't installed, isn't logged in, doesn't offer that model, or ran out of usage. Install Codex tomorrow and it joins automatically — it's already on the lists.
-- **Your overrides** live in `~/.config/pilotfish/team.toml` (`pilotfish config` creates it). Add only what you change; updates never touch it.
+- **Your overrides** live in `~/.config/pilotfish/team.toml` (`pilotfish config --template` creates it). Add only what you change; updates never touch it.
 - **A role can have its own list** instead of a tier, e.g. `security = ["claude:opus", "codex:gpt-6-astra"]`.
 - **One-off changes:** tell the coordinator "use Codex for security on this one" and it applies just to that task.
 - **Effort per role:** `[effort]` sets how hard each worker thinks (`low`, `medium`, `high`); roles not listed use `default` (`medium`). It matters for Claude workers, and more effort means more usage. The coordinator's own effort is the one of the tab you open in Orca.
@@ -140,7 +140,7 @@ developer = ["opencode:deepseek/deepseek-v4-pro", "opencode:deepseek/deepseek-fl
 qa = "low"
 ```
 
-Each line belongs to the `[section]` above it: `qa = "low"` under `[roles]` would mean "QA uses a tier called low". The commented template that `pilotfish config` creates lists every option.
+Each line belongs to the `[section]` above it: `qa = "low"` under `[roles]` would mean "QA uses a tier called low". The commented template that `pilotfish config --template` creates lists every option.
 
 See what each role will use right now:
 
@@ -155,6 +155,32 @@ reviewer     standard  claude:sonnet                              —
 bug_hunter   strong    claude:opus                                —
 security     strong    claude:opus                                —
 ```
+
+### Per project
+
+Each project can have its own team, saved in `.pilotfish.toml` in its main checkout (local, outside git). Layers, from weakest to strongest: Pilotfish's defaults, your settings, the project's.
+
+- **When a project starts**, the coordinator detects what's on the machine and offers three starting points: **quality** (strongest models first, also for development), **balanced** (the defaults) and **saving** (cheap models first; strong ones only where a miss costs most). Then you change single roles if you want.
+- **Change it later** by asking the coordinator ("from now on the reviewer is Codex"), with the terminal assistant `pilotfish config`, or directly:
+
+```bash
+pilotfish detect                          # every model usable on this machine
+pilotfish agents --preset saving          # preview a starting point
+pilotfish set --preset saving             # apply it to this project
+pilotfish set --role reviewer=codex:gpt-6.1-sol,claude:sonnet --mode necessary --effort qa=low
+```
+
+## 🎚️ Team modes
+
+At the start of every workflow the coordinator asks how many auditors you want, and tells you who would work in each case:
+
+| Mode | Auditors |
+|---|---|
+| **Full** | QA, reviewer, bug hunter and security, always |
+| **Necessary** | QA and reviewer; bug hunter and security when the change calls for them |
+| **Minimal** | None: the coordinator reviews the diff itself and runs the checks |
+
+Add or drop an auditor at any moment ("run the bug hunter on this", "no security review this time"). To skip the question, set a default with `team_mode` under `[rules]` in your config: `"full"`, `"necessary"` or `"minimal"` (`"ask"` is the default). Hooks, CI, the separate test database and your merge apply in every mode.
 
 ## 🔁 Fallbacks and handoff
 

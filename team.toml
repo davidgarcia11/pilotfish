@@ -13,7 +13,7 @@
 # or has run out of usage (the coordinator excludes it and moves to the next one).
 [tiers]
 strong = ["claude:opus", "codex:gpt-6-astra", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
-standard = ["claude:sonnet", "codex:gpt-6-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
+standard = ["claude:sonnet", "codex:gpt-6.1-sol", "opencode:deepseek/deepseek-v4-pro", "opencode:zai-coding-plan/glm-5.3"]
 budget = ["opencode:deepseek/deepseek-flash", "opencode:zai-coding-plan/glm-5.3-flash", "claude:sonnet"]
 
 # Each role asks for a tier, or for its own list if you want something very specific:
@@ -27,6 +27,35 @@ reviewer = "standard"
 bug_hunter = "strong"
 security = "strong"
 
+# Starting points for a project's team: `pilotfish set --preset NAME` (or `pilotfish config`).
+# Each one maps every role to a tier; the project can then change single roles.
+[presets.quality]     # the strongest available model first, also for development and QA
+plan = "strong"
+coordinate = "standard"
+developer = "standard"
+qa = "standard"
+reviewer = "strong"
+bug_hunter = "strong"
+security = "strong"
+
+[presets.balanced]    # the defaults above
+plan = "strong"
+coordinate = "standard"
+developer = "budget"
+qa = "budget"
+reviewer = "standard"
+bug_hunter = "strong"
+security = "strong"
+
+[presets.saving]      # cheap models first; strong ones only where a miss costs most
+plan = "standard"
+coordinate = "standard"
+developer = "budget"
+qa = "budget"
+reviewer = "budget"
+bug_hunter = "standard"
+security = "standard"
+
 # Reasoning effort of each worker Orca launches (low, medium, high). Roles not listed use "default".
 # It matters for Claude workers; other agents may ignore it. More effort means more usage.
 # The coordinator's own effort is the one of the tab you open in Orca.
@@ -35,6 +64,12 @@ default = "medium"
 # qa = "low"
 
 [rules]
+# How many auditors work on each flow:
+#   "ask"       the coordinator asks at the start of every flow (default),
+#   "full"      QA, reviewer, bug hunter and security, always,
+#   "necessary" QA and reviewer; bug hunter and security when the change calls for them,
+#   "minimal"   no auditors: the coordinator reviews the diff itself.
+team_mode = "ask"
 # When no model is left in a role's tier:
 #   "pause"     stop and tell the user (recommended for sensitive roles),
 #   "downgrade" use the next tier down (strong → standard → budget).
