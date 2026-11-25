@@ -175,6 +175,7 @@ comprueba "con DeepSeek: el desarrollador usa DeepSeek Flash" "[ \"\$(eleccion d
 comprueba "con DeepSeek: el revisor es de otro proveedor" "[ \"\$(eleccion reviewer)\" = claude:sonnet ]"
 comprueba "Claude sin uso: seguridad pasa a DeepSeek Pro" "[ \"\$(eleccion security --without claude)\" = opencode:deepseek/deepseek-v4-pro ]"
 comprueba "Claude y DeepSeek sin uso: seguridad se pausa" "[ \"\$(eleccion security --without claude,deepseek)\" = paused ]"
+comprueba "--without repetido suma las exclusiones" "[ \"\$(eleccion security --without claude --without deepseek)\" = paused ]"
 printf '[tiers]\nstrong = ["claude:opus"]\n[rules]\nwhen_tier_exhausted = "downgrade"\n' > "$casa/team.toml"
 comprueba "Claude sin uso y «downgrade»: seguridad baja al nivel estándar" "[ \"\$(eleccion security --without claude)\" = opencode:deepseek/deepseek-v4-pro ]"
 printf '[tiers]\nbudget = ["opencode:deepseek/deepseek-chat", "claude:sonnet"]\n' > "$casa/team.toml"
