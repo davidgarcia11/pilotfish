@@ -99,6 +99,11 @@ git reset -q --hard HEAD~1
 
 echo "no-commit-main"
 comprueba "bloquea commits en main con historial" "! echo '{\"cwd\":\"$repo\"}' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
+entrada_hook() { printf '{"cwd":"%s","tool_input":{"command":"%s"}}' "$repo" "$1"; }
+comprueba "permite en main un comando compuesto sin commit" "entrada_hook 'git status && mise run check' | bash .claude/hooks/no-commit-main.sh"
+comprueba "permite en main la palabra commit como argumento" "entrada_hook 'git log --grep commit' | bash .claude/hooks/no-commit-main.sh"
+comprueba "bloquea en main un commit dentro de un comando compuesto" "! entrada_hook 'cd sub && git commit -m x' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
+comprueba "bloquea en main un commit con git -C" "! entrada_hook 'git -C . commit -m x' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
 git switch -q -c feat/prueba
 comprueba "permite commits en una rama" "echo '{\"cwd\":\"$repo\"}' | bash .claude/hooks/no-commit-main.sh"
 
