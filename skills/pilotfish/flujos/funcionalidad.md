@@ -60,11 +60,21 @@ Si `plan` y `coordinate` usan modelos distintos, sugiere ahora al usuario el cam
 
 ## 4. Desarrollo
 
-Lanza el `developer` (`--worktree current`) por bloques de hasta 5 tareas. Encargo, además de su papel:
+Lanza el `developer` (`--worktree current`, `--keep-open`) con el primer bloque de hasta 5 tareas y mándale los siguientes al mismo trabajador con `send` («Un desarrollador por funcionalidad» en `SKILL.md`). Encargo, además de su papel:
 
-> Rama `feat/NNN-nombre-corto`, en este worktree. Implementa las tareas T1-T5 de `docs/specs/NNN-nombre-corto/tasks.md` según `spec.md` y `plan.md`. Un commit por tarea con su test.
+> Rama `feat/NNN-nombre-corto`, en este worktree. Implementa las tareas T1-T5 de `docs/specs/NNN-nombre-corto/tasks.md` según `spec.md` y `plan.md`. Un commit por tarea con su test. Informe en la bitácora: `<ruta>`.
 
-Tras cada bloque comprueba tú: `git log --oneline origin/main..HEAD`, tareas marcadas en `tasks.md`, `mise run check` en verde y que el informe trae, por tarea, el motivo del fallo en rojo. Anota las tareas «sin rojo» para QA. Lleva al usuario los bloqueos de diseño y las desviaciones del plan que cambien configuración, dependencias o comportamiento; las demás, resúmelas al final del bloque.
+Tras cada bloque comprueba tú, sin repetir lo que ya se ejecutó: `git log --oneline origin/main..HEAD`, tareas marcadas en `tasks.md`, y que el informe trae, por tarea, el motivo del fallo en rojo, y el resultado de `mise run check` completo con el commit en que se ejecutó, que debe ser el último del bloque. Si falta o no corresponde, pídeselo al desarrollador; no lo ejecutes tú. Anota las tareas «sin rojo» para la comprobación de los tests. Lleva al usuario los bloqueos de diseño y las desviaciones del plan que cambien configuración, dependencias o comportamiento; las demás, resúmelas al final del bloque.
+
+**Cada comprobación, una sola vez y en su capa:**
+
+| Capa | Qué |
+|---|---|
+| Hook `pre-commit` | formato, lint y secretos de lo preparado; mensaje del commit |
+| Desarrollador, por tarea | tipos y **solo los tests relacionados** con lo cambiado |
+| Desarrollador, por bloque | `mise run check` completo, una vez |
+| Coordinador | revisa la evidencia; no repite el check |
+| CI de la PR | la autoridad: check, `mise run calidad` si existe y e2e |
 
 ## 5. Auditorías
 
@@ -93,12 +103,12 @@ Consolida los informes: une duplicados, conserva el texto completo de cada halla
 - MEDIO: se corrigen salvo que sean muchos o costosos; en ese caso pregunta al usuario cuáles aplazar.
 - BAJO: van a la PR como pendientes.
 
-Lanza el `developer` (`--worktree current`) con todos los hallazgos a corregir en un solo encargo, completos. Si discute un hallazgo, decide tú cuando sea evidente y pregunta al usuario cuando no.
+Manda al mismo `developer` (con `send`; uno nuevo solo si el anterior ya no está) todos los hallazgos a corregir en un solo encargo, completos. Si discute un hallazgo, decide tú cuando sea evidente y pregunta al usuario cuando no.
 
 Verificación:
 
 - Solo los CRÍTICO y ALTO hacen relanzar auditores: relanza solo los que los encontraron, indicándoles qué hallazgos deben verificar y que no repitan la auditoría entera.
-- Los MEDIO los verificas tú: el test nuevo existe, falla sin la corrección y `mise run check` está en verde.
+- Los MEDIO los verificas tú con la evidencia del informe: el test nuevo existe, el desarrollador lo vio fallar sin la corrección y su `mise run check` del último commit está en verde.
 
 Máximo 2 rondas. Si tras la segunda queda algún CRÍTICO o ALTO, para y presenta al usuario cada hallazgo con su coste estimado para que decida qué se corrige ya y qué va a pendientes.
 
@@ -111,8 +121,9 @@ Máximo 2 rondas. Si tras la segunda queda algún CRÍTICO o ALTO, para y presen
 
 ## 8. PR
 
+Comprueba que el último `mise run check` del informe corresponde a `HEAD` (si después hubo commits, aunque sean de documentación, pide o ejecuta uno solo) y empuja; la CI de la PR es la comprobación final:
+
 ```bash
-mise run check
 git push -u origin feat/NNN-nombre-corto
 ```
 

@@ -128,6 +128,10 @@ Usa la orquestación de Orca (comando `orca`). Antes del primer encargo del fluj
 
 Nunca hay dos trabajadores tocando el mismo worktree a la vez. Mientras el desarrollador trabaja, tú tampoco cambias código ni ejecutas pruebas en ese worktree.
 
+**Un desarrollador por funcionalidad.** Lanza al `developer` una sola vez (con `--keep-open`) y mándale los bloques siguientes y las correcciones con `orca orchestration send --to dispatch:<id>`: conserva lo que ya leyó y no paga otro arranque en frío releyendo especificación, plan e informes. Solo lanzas uno nuevo si el anterior murió o se quedó sin uso.
+
+**Bitácora de la funcionalidad.** Todos los trabajadores escriben su informe, una sección por encargo, en `$(git rev-parse --path-format=absolute --git-common-dir)/pilotfish/NNN-nombre/bitacora.md`: dentro de `.git`, así que queda fuera del historial, la comparten todos los worktrees y no se borra al reiniciar. El encargo indica la ruta y pide leer solo las secciones que hagan falta, no la bitácora entera.
+
 **Antes de dar por fallido a un trabajador** necesitas una prueba, no una sospecha: que la orquestación diga que ha terminado o fallado, o que su terminal muestre que el agente ha salido o que espera una respuesta que nunca llegará (un aviso de permisos, un error). Mira su estado y su terminal antes de decidir. Si sigue trabajando, espera. Si hay que sustituirlo, primero detenlo y libéralo (`worker-release`), confirma que ya no está activo y revisa `git status` del worktree: si dejó cambios a medias, decide con el usuario si se conservan o se descartan. Solo entonces lanzas al siguiente.
 
 **Si un trabajador pide aceptar el modo bypass** («Bypass Permissions», «Acceso total»), no lo aceptes nunca, ni lo pidas al usuario. Detenlo y dile al usuario que en Orca, Ajustes → host del servidor → Agentes, cambie los permisos a «Aprobar por mí» (y que quite `--dangerously-skip-permissions` de los argumentos de Claude). Mientras tanto, si el papel es de Claude, haz el encargo con tus propios subagentes.
