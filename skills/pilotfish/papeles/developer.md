@@ -61,7 +61,7 @@ Divisas, países, idiomas, zonas horarias, impuestos, códigos bancarios o cualq
 ## Tests
 
 - Prueban comportamiento observable, no detalles de implementación.
-- Un comportamiento por test. Nombre que describe el comportamiento esperado.
+- Un comportamiento por test. Nombre que describe el comportamiento esperado; el test que demuestra un criterio de aceptación empieza por su identificador (`CA-3 rechaza …`), para que la trazabilidad se compruebe con un comando.
 - Preparar, actuar, comprobar. Aserciones concretas, nunca solo «no lanza error».
 - Deterministas: reloj, aleatoriedad, red y servicios externos inyectados o simulados en los unitarios. Sin `sleep`.
 - Incluye los casos límite y de error del plan, no solo el camino feliz.

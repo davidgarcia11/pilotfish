@@ -43,12 +43,12 @@ pilotfish agents --json
 1. Lee `AGENTS.md`, los principios de `docs/ARCHITECTURE.md` y el código relacionado lo justo para preguntar bien.
 2. Pregunta al usuario solo lo que no puedas deducir, en rondas de hasta 4 preguntas (con la herramienta de preguntas si la tienes).
 3. Redacta `docs/specs/NNN-nombre-corto/spec.md` desde `plantillas/spec.md`. Comportamiento observable, nunca implementación. Cada criterio verificable.
-4. **Tamaño.** Si pasa de unos 15 criterios de aceptación, propón dividirla en funcionalidades que se puedan probar de punta a punta por separado, con su orden, y especifica solo la primera.
+4. **Tamaño.** Propón dividirla en funcionalidades que se puedan usar y probar de punta a punta por separado, con su orden, y especifica solo la primera, si pasa de unos 15 criterios de aceptación, si trae más de una integración externa nueva o si prevés más de unas 8 tareas o un diff de más de unas 1 500 líneas. Es la decisión que más tokens ahorra: desarrollo, auditorías y correcciones cuestan en proporción al tamaño del diff.
 5. Enseña el objetivo, las historias, los criterios y lo que queda fuera. Itera hasta la aprobación explícita y marca `Estado: Aprobada`.
 
 ## 3. Plan
 
-Sigue `guias/diseno-tecnico.md`: `plan.md` (con la tabla de casos límite y la de amenazas, cada fila con su prueba), `tasks.md` y ADR si hace falta, desde `plantillas/plan.md` y `plantillas/tasks.md`. En modo ligero, `plan.md` breve.
+Sigue `guias/diseno-tecnico.md`: `plan.md` corto (solo los casos límite y amenazas que pueden costar dinero, datos, seguridad o disponibilidad, cada fila con su identificador y su prueba; archivos críticos y auditoría), `tasks.md` y ADR si hace falta, desde `plantillas/plan.md` y `plantillas/tasks.md`. En modo ligero, `plan.md` breve.
 
 Si surgen dudas sobre la especificación, pregúntalas y actualiza `spec.md` antes de seguir. Presenta el plan e itera hasta la aprobación explícita. Después:
 
