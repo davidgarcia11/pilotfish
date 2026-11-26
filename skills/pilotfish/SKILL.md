@@ -55,13 +55,14 @@ Lo determinista lo comprueban el hook, el check y la CI (y `mise run calidad` si
 
 | Cambio | Auditoría |
 |---|---|
-| Dependencias, textos, estilos, documentación, arreglo de una línea | Modo mínimo: tú, con la evidencia del check y la CI |
+| Dependencias, textos, estilos, documentación, arreglo de una línea, sin ningún disparador de abajo | Modo mínimo: tú, con la evidencia del check y la CI |
 | Funcionalidad sin dinero, permisos ni red | Revisor de otro proveedor |
 | Con dinero, fechas, concurrencia, tareas periódicas, colas o servicios externos | + cazabugs acotado a los archivos de cálculo o de la tarea |
 | Con autenticación, permisos, secretos o datos personales | + seguridad acotada a esos archivos |
-| Proyecto sin `mise run calidad` en la CI | + QA (con la lista completa de su papel) |
+| Proyecto sin `mise run calidad` en la CI | + QA (lo que la CI no cubre) |
 
-- **Acotado** quiere decir que el encargo lleva la lista de archivos críticos del plan y un orden de prioridad, nunca el diff entero.
+- **Acotado** (especialistas) quiere decir que el encargo lleva la lista de archivos críticos del plan y un orden de prioridad, nunca el diff entero. El revisor, en cambio, cubre todo el diff: así nada llega a la PR sin que alguien lo haya leído.
+- La tabla concreta el modo elegido, no lo sustituye: en `full` van todos, y un disparador de riesgo manda sobre el tamaño (un arreglo de una línea en permisos lleva seguridad).
 - **Escalonado y repartido.** Lanza primero al revisor; si los especialistas van a la vez, que no sean todos del mismo proveedor que acaba de gastar cupo el desarrollador. Un corte de cupo no debe tumbar a todos a la vez.
 - En funcionalidades largas, el revisor puede mirar cada bloque al terminarlo (diffs pequeños) en vez de todo al final.
 
@@ -140,7 +141,7 @@ Usa la orquestación de Orca (comando `orca`). Antes del primer encargo del fluj
    - `developer`: `--worktree current` (trabaja en la rama de la funcionalidad).
    - `qa`, `reviewer`, `bug_hunter` y `security`: `--worktree new-child` (un worktree propio a partir de la rama; aunque toquen algo, no afecta a la rama). Antes de dar por bueno su informe, comprueba que el commit evaluado es el último de la rama.
 4. Espera los resultados con `orca orchestration check --wait` y un tiempo de espera largo (unos 15 minutos), sin consultar en bucle: cada consulta te cuesta uso. No termines tu turno mientras haya trabajadores sin informe: si lo terminas, nadie te despierta cuando lleguen. Si vence la espera, vuelve a esperar. Que no haya mensajes no significa que el trabajador esté parado: un desarrollador puede pasar muchos minutos leyendo y probando sin escribir nada.
-5. Lee el informe completo (`worker-read`), libera el trabajador (`worker-release`) y, si era un worktree hijo, borra sus bases (`scripts/entorno-worktree.sh --borrar` dentro de él, si el proyecto lo tiene) y el worktree (`orca worktree rm`).
+5. Lee el informe completo (`worker-read` o la bitácora), libera el trabajador (`worker-release`; el desarrollador no: sigue abierto hasta abrir la PR, para reutilizarlo) y, si era un worktree hijo, borra sus bases (`scripts/entorno-worktree.sh --borrar` dentro de él, si el proyecto lo tiene) y el worktree (`orca worktree rm`).
 
 Nunca hay dos trabajadores tocando el mismo worktree a la vez. Mientras el desarrollador trabaja, tú tampoco cambias código ni ejecutas pruebas en ese worktree.
 

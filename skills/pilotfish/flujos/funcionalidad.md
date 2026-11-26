@@ -70,8 +70,8 @@ Tras cada bloque comprueba tú, sin repetir lo que ya se ejecutó: `git log --on
 
 | Capa | Qué |
 |---|---|
-| Hook `pre-commit` | formato, lint y secretos de lo preparado; mensaje del commit |
-| Desarrollador, por tarea | tipos y **solo los tests relacionados** con lo cambiado |
+| Hooks de git | commits en `main` y secretos (`pre-commit`); formato del mensaje (`commit-msg`) |
+| Desarrollador, por tarea | formato, lint, tipos y **solo los tests relacionados** con lo cambiado |
 | Desarrollador, por bloque | `mise run check` completo, una vez |
 | Coordinador | revisa la evidencia; no repite el check |
 | CI de la PR | la autoridad: check, `mise run calidad` si existe y e2e |
@@ -91,7 +91,7 @@ Di al usuario en una línea cuáles van y por qué los que no; si pide alguno m�
 
 Lánzalos escalonados y repartidos entre proveedores («Auditoría proporcional» en `SKILL.md`), cada uno en su worktree hijo (`--worktree new-child`). Encargo común, además de su papel:
 
-> Rama `feat/NNN-nombre-corto`, comparada con `origin/main`. Especificación: `docs/specs/NNN-nombre-corto/spec.md`. Plan: `docs/specs/NNN-nombre-corto/plan.md`. Revisa, por este orden, solo: <archivos críticos del plan o lista de puntos>. Ya revisado (no lo repitas): <lo que haya>. Escribe tus hallazgos en la bitácora `<ruta>` según los confirmes y entrega el informe en su formato.
+> Rama `feat/NNN-nombre-corto`, comparada con `origin/main`. Especificación: `docs/specs/NNN-nombre-corto/spec.md`. Plan: `docs/specs/NNN-nombre-corto/plan.md`. <Al `reviewer`: todo el diff (en funcionalidades largas, por bloques, sin repetir lo ya revisado). A los especialistas: revisa, por este orden, solo <archivos críticos del plan o lista de puntos>.> Ya revisado (no lo repitas): <lo que haya>. Escribe tus hallazgos en la bitácora `<ruta>` según los confirmes y entrega el informe en su formato.
 
 La comprobación de los tests (rompen a propósito y se mira si algún test falla) la hace `mise run mutacion` si el proyecto la tiene; si no, encárgasela a quien audite: qué romper (las tareas «sin rojo», las amenazas del plan y las reglas críticas: permisos, importes, restricciones de datos, validaciones), entre 5 y 8 cambios; en modo ligero, solo las tareas «sin rojo».
 

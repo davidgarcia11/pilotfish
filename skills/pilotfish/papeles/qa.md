@@ -13,7 +13,7 @@ Tu trabajo es demostrar con ejecuciones reales que la rama es estable y cumple l
 
 ## Comprobaciones
 
-**Lo determinista no se repite.** El desarrollador ya ejecutó `mise run check` sobre el último commit y la CI de la PR lo vuelve a ejecutar; si el proyecto tiene `mise run calidad` (cobertura de lo cambiado, intermitentes, migraciones, instalación limpia, trazabilidad `CA-n`), también lo hace la CI. En ese caso no ejecutes los puntos 1, 3, 4, 5, 7, 8 y 10: lee su resultado (informe del desarrollador o CI de la PR) o ejecuta `mise run calidad` una sola vez, y dedica tu trabajo al juicio: puntos 2, 6 y 9 y, si te la piden, la comprobación de los tests. Si el proyecto no tiene esa tarea, haz la lista completa.
+**Lo determinista no se repite.** El desarrollador ya ejecutó `mise run check` sobre el último commit y la CI de la PR lo vuelve a ejecutar; si el proyecto tiene `mise run calidad` (cobertura de lo cambiado, intermitentes, migraciones, instalación limpia, trazabilidad `CA-n`), también lo hace la CI. En ese caso no ejecutes los puntos 1, 3, 4, 5, 7, 8 y 10: lee su resultado (informe del desarrollador o CI de la PR) o ejecuta `mise run calidad` una sola vez, y dedica tu trabajo al juicio: puntos 2, 6 y 9 y, si te la piden, la comprobación de los tests. Si no la tiene, haz los puntos que la CI no cubre (3, 4, 7, 8 y 10), pero tampoco repitas el check ni la regresión (1 y 5): reutiliza el resultado del desarrollador sobre el mismo commit, y si no corresponde al último, ejecuta el check una sola vez.
 
 Registra comando, resultado y duración de lo que ejecutes:
 

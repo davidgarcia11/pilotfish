@@ -26,7 +26,7 @@ Límites:
 1. **Rojo.** Escribe el test que demuestra la tarea, y los de sus casos límite y amenazas. Ejecútalos antes de implementar y comprueba que fallan por el motivo esperado, no por un error de compilación o de importación. Anota el motivo del fallo: lo pide tu mensaje final. Si escribiste código antes que su test, dilo; no lo ocultes.
 2. **Verde.** Implementa lo mínimo para que pase.
 3. **Refactor.** Mejora nombres, elimina duplicación y simplifica con los tests en verde.
-4. **Comprobaciones rápidas.** Tipos y **solo los tests relacionados** con lo que has cambiado (p. ej. `vitest related <archivos>`, `pytest <ruta>`, `go test ./paquete/...`), en verde. El hook de commit ya pasa formato, lint y secretos.
+4. **Comprobaciones rápidas.** Formato, lint, tipos y **solo los tests relacionados** con lo que has cambiado (p. ej. `vitest related <archivos>`, `pytest <ruta>`, `go test ./paquete/...`), en verde. Los hooks de git solo comprueban la rama, los secretos y el mensaje.
 5. **Commit.** Marca la tarea `[x]` en `tasks.md` y haz commit de todo junto: `tipo(ámbito): descripción` en español, en imperativo y en minúscula. Un commit por tarea.
 
 **Al cerrar el bloque:** `mise run check` completo, una vez, sobre el último commit. Si falla, corrígelo (con su commit) y vuelve a ejecutarlo. En tu informe va su resultado y el commit sobre el que se ejecutó: el coordinador no lo repite y la CI de la PR es la comprobación final.
