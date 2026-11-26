@@ -80,7 +80,7 @@ Si el scaffold hizo su propio commit, borra `.git` y vuelve a `git init -b main`
 pilotfish scaffold --forge github   # o gitlab; --services y --runbook si el plan los incluye
 ```
 
-Copia sin sobrescribir: hooks de git (secretos, formato de commits y firmas de IA), `scripts/comprobar-commits.sh`, `cliff.toml`, CI, plantilla de PR/MR, `docs/`, `AGENTS.md`, `CLAUDE.md`, `.claude/` (permisos y hook que bloquea commits en `main`), `.worktreeinclude`, `orca.yaml` (scripts de preparación y archivado de cada worktree), y con `--services` el `compose.yaml` y `scripts/entorno-worktree.sh`. Configura `core.hooksPath`, la exclusión local y el `.gitignore`. Lee su salida y resuelve lo que indique.
+Copia sin sobrescribir: hooks de git (commits en `main` bloqueados salvo el inicial, secretos, formato de commits y firmas de IA), `scripts/comprobar-commits.sh`, `cliff.toml`, CI, plantilla de PR/MR, `docs/`, `AGENTS.md`, `CLAUDE.md`, `.claude/` (permisos), `.worktreeinclude`, `orca.yaml` (scripts de preparación y archivado de cada worktree), y con `--services` el `compose.yaml` y `scripts/entorno-worktree.sh`. Configura `core.hooksPath`, la exclusión local y el `.gitignore`. Lee su salida y resuelve lo que indique.
 
 ### 3b. Equipo del proyecto
 

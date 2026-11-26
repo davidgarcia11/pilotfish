@@ -200,7 +200,7 @@ Por proyecto solo creas el `.env` con tus secretos y añades el proyecto en Orca
 
 ```text
 mi-proyecto/
-├── .githooks/          secretos, formato de commits, firmas de IA        ┐
+├── .githooks/          commits en main, secretos, formato, firmas de IA  ┐
 ├── .github/            CI (check + comprobación de commits), plantilla PR │
 ├── scripts/            comprobar-commits.sh, entorno-worktree.sh         │ en git
 ├── docs/               arquitectura, ADR, especificaciones, runbook      │
@@ -208,7 +208,7 @@ mi-proyecto/
 ├── orca.yaml           qué ejecuta Orca al crear y archivar un worktree  ┘
 ├── AGENTS.md           reglas del proyecto para cualquier agente         ┐
 ├── CLAUDE.md           @AGENTS.md                                        │ solo local
-├── .claude/            permisos y hook que bloquea commits en main       │
+├── .claude/            permisos de los agentes                           │
 └── .worktreeinclude    lo que Orca copia a cada worktree                 ┘
 ```
 

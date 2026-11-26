@@ -37,6 +37,8 @@ pilotfish scaffold --forge <github|gitlab> [--services] [--runbook] --dir "$ref"
 | `mise.toml` | Tareas y `[env]` de la referencia que no existan; sin tocar las versiones fijadas |
 | `.worktreeinclude`, `.gitignore`, `.git/info/exclude` | Líneas que falten |
 
+**Retirada:** si el proyecto tiene `.claude/hooks/no-commit-main.sh` y su entrada `hooks` en `.claude/settings.json`, propón retirarlos (también en la copia principal y en `.worktreeinclude`): la guarda de commits en `main` está ahora en `.githooks/pre-commit`, que conoce el repositorio y la rama reales. Es la única excepción a «nunca quitar una entrada del proyecto».
+
 Si el proyecto tiene base de datos y los tests usan la de desarrollo, o no puede trabajar en varios worktrees a la vez, propón `scripts/entorno-worktree.sh`, `TEST_DATABASE_URL` y `mise run entorno` en `setup`, siguiendo «Entorno por worktree» de `flujos/nuevo-proyecto.md`. Si el proyecto ya tiene su propia forma de crear la base de tests (un script de inicio del contenedor, un rol propio), explica al usuario cómo encaja antes de aplicarlo.
 
 Si falta `orca.yaml` y el usuario tiene scripts de preparación o archivado en los ajustes de Orca, al cerrar dile que los borre para que mande el de `orca.yaml`.

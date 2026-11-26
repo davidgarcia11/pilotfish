@@ -78,6 +78,7 @@ comprueba "no muestra archivos de los agentes en git status" "! git status --por
 comprueba "es idempotente" "! grep -q Creados \"$tmp/salida2.txt\" && [ \"\$(grep -cxF AGENTS.md .git/info/exclude)\" = 1 ]"
 
 echo "commit-msg"
+git switch -q -c feat/mensajes
 intenta() { git commit -q --allow-empty -m "$1" 2>/dev/null; }
 comprueba "rechaza un mensaje sin formato" "! intenta 'mensaje sin formato'"
 comprueba "rechaza un tipo en mayúscula" "! intenta 'Feat: algo'"
@@ -97,16 +98,16 @@ git commit -q --allow-empty --no-verify -m "cambios varios"
 comprueba "rechaza un formato no válido colado con --no-verify" "! bash scripts/comprobar-commits.sh $inicio..HEAD > /dev/null 2>&1"
 git reset -q --hard HEAD~1
 
-echo "no-commit-main"
-comprueba "bloquea commits en main con historial" "! echo '{\"cwd\":\"$repo\"}' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
-entrada_hook() { printf '{"cwd":"%s","tool_input":{"command":"%s"}}' "$repo" "$1"; }
-comprueba "permite en main un comando compuesto sin commit" "entrada_hook 'git status && mise run check' | bash .claude/hooks/no-commit-main.sh"
-comprueba "permite en main la palabra commit como argumento" "entrada_hook 'git log --grep commit' | bash .claude/hooks/no-commit-main.sh"
-comprueba "bloquea en main un commit dentro de un comando compuesto" "! entrada_hook 'cd sub && git commit -m x' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
-comprueba "bloquea en main un commit con git -C" "! entrada_hook 'git -C . commit -m x' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
-comprueba "bloquea en main un commit dentro de bash -c" "! entrada_hook 'bash -c \\\"git commit -m x\\\"' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
+echo "pre-commit: commits en main"
+git switch -q -C main
+intenta_commit() { git "$@" commit -q --allow-empty -m "chore: prueba" 2>/dev/null; }
+comprueba "bloquea commits en main con historial" "! intenta_commit"
+comprueba "bloquea un commit en main con opciones con espacios" "! intenta_commit -c 'user.name=Nombre Apellido'"
+comprueba "bloquea un commit en main con git -C desde otra carpeta" "! (cd \"$tmp\" && intenta_commit -C \"$repo\")"
+git init -q -b main "$tmp/nuevo"
+comprueba "permite el commit inicial en main" "git -C \"$tmp/nuevo\" -c core.hooksPath=\"$repo/.githooks\" -c user.name=Prueba -c user.email=prueba@example.com commit -q --allow-empty -m 'chore: inicial'"
 git switch -q -c feat/prueba
-comprueba "permite commits en una rama" "echo '{\"cwd\":\"$repo\"}' | bash .claude/hooks/no-commit-main.sh"
+comprueba "permite commits en una rama" "intenta_commit"
 
 echo "entorno por worktree"
 falso="$tmp/falso"; mkdir -p "$falso"; export SQL_LOG="$tmp/sql.log"

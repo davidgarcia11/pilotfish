@@ -194,7 +194,7 @@ scaffold() {
   [ "$services" -eq 1 ] && copy_tree "$templates/servicios"
   [ "$runbook" -eq 1 ] && copy_tree "$templates/opcional/runbook"
 
-  chmod +x .githooks/* scripts/*.sh .claude/hooks/*.sh 2>/dev/null || true
+  chmod +x .githooks/* scripts/*.sh 2>/dev/null || true
   git config core.hooksPath .githooks
 
   add_lines() {

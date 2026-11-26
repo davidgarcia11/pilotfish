@@ -1,3 +1,14 @@
 #!/bin/sh
-# Bloquea el commit si lo preparado contiene secretos.
+# 1. Bloquea los commits en main/master cuando ya hay historial (el commit inicial pasa).
+#    Git ejecuta este hook en el repositorio y la rama reales del commit, se invoque como
+#    se invoque (`git -C`, alias, scripts, `git switch main && git commit`…).
+# 2. Bloquea el commit si lo preparado contiene secretos.
+if git rev-parse --verify -q HEAD >/dev/null; then
+  rama=$(git symbolic-ref --short -q HEAD)
+  case "$rama" in
+    main | master)
+      echo "Commit bloqueado en '$rama'. Crea una rama: git switch -c feat/<descripcion>" >&2
+      exit 1 ;;
+  esac
+fi
 exec mise exec -- gitleaks git --pre-commit --redact --staged --no-banner

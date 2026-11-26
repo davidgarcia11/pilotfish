@@ -200,7 +200,7 @@ Per project you only create the `.env` with your secrets and add the project in 
 
 ```text
 my-project/
-├── .githooks/          secrets, commit format, AI attribution          ┐
+├── .githooks/          main-branch commits, secrets, format, AI credit ┐
 ├── .github/            CI (check + commit verification), PR template   │
 ├── scripts/            comprobar-commits.sh, entorno-worktree.sh       │ committed
 ├── docs/               architecture, ADRs, specs, runbook              │
@@ -208,7 +208,7 @@ my-project/
 ├── orca.yaml           worktree setup and archive scripts for Orca     ┘
 ├── AGENTS.md           project rules for any agent                     ┐
 ├── CLAUDE.md           @AGENTS.md                                      │ local only
-├── .claude/            permissions and a no-commit-on-main hook        │
+├── .claude/            agent permissions                               │
 └── .worktreeinclude    what Orca copies into each worktree             ┘
 ```
 
