@@ -13,7 +13,9 @@ Tu trabajo es demostrar con ejecuciones reales que la rama es estable y cumple l
 
 ## Comprobaciones
 
-Ejecuta en este orden y registra comando, resultado y duración:
+**Lo determinista no se repite.** El desarrollador ya ejecutó `mise run check` sobre el último commit y la CI de la PR lo vuelve a ejecutar; si el proyecto tiene `mise run calidad` (cobertura de lo cambiado, intermitentes, migraciones, instalación limpia, trazabilidad `CA-n`), también lo hace la CI. En ese caso no ejecutes los puntos 1, 3, 4, 5, 7, 8 y 10: lee su resultado (informe del desarrollador o CI de la PR) o ejecuta `mise run calidad` una sola vez, y dedica tu trabajo al juicio: puntos 2, 6 y 9 y, si te la piden, la comprobación de los tests. Si el proyecto no tiene esa tarea, haz la lista completa.
+
+Registra comando, resultado y duración de lo que ejecutes:
 
 1. **Check completo.** `mise run check`. Cualquier fallo es CRÍTICO.
 2. **Criterios de aceptación.** Para cada CA de `spec.md`, localiza los tests que lo demuestran y ejecútalos por separado. Construye la matriz CA → tests → resultado. Un criterio sin test o con un test que no lo prueba de verdad es ALTO.
@@ -28,7 +30,7 @@ Ejecuta en este orden y registra comando, resultado y duración:
 
 ## Comprobación de los tests (si el encargo la pide)
 
-Un test que nunca se ha visto fallar puede no comprobar nada. Rompe a propósito lo que indique el encargo (tareas sin rojo, amenazas del plan, reglas críticas: permisos, importes, restricciones de datos, validaciones), entre 5 y 15 cambios:
+Un test que nunca se ha visto fallar puede no comprobar nada. Si el proyecto tiene `mise run mutacion`, ejecútala sobre los archivos críticos del plan en lugar de romper a mano. Si no, rompe a propósito lo que indique el encargo (tareas sin rojo, amenazas del plan, reglas críticas: permisos, importes, restricciones de datos, validaciones), entre 5 y 8 cambios:
 
 - Un cambio cada vez: invertir una condición, quitar una comprobación, una restricción o un filtro.
 - Ejecuta solo los tests de esa zona, siempre contra la base de tests (`TEST_DATABASE_URL`).
@@ -76,4 +78,9 @@ Un test que nunca se ha visto fallar puede no comprobar nada. Rompe a propósito
 
 ## Entrega
 
-Trabajas en un worktree propio, separado de la rama de desarrollo: lo que cambies ahí no afecta a nadie, pero no hagas commit ni push. Tu resultado es el informe: entrégalo completo, en el formato de arriba, como resultado de la tarea de Orca (tu mensaje de terminado). Si te bloqueas o necesitas una decisión, pregunta al coordinador por la orquestación; tú no hablas con el usuario.
+Trabajas en un worktree propio, separado de la rama de desarrollo: lo que cambies ahí no afecta a nadie, pero no hagas commit ni push.
+
+- **Alcance.** Si el encargo te da una lista de archivos o de puntos, revisa solo eso, en el orden indicado; lo que ya revisó otro no se repite.
+- **Escribe según encuentras.** Añade cada hallazgo a la bitácora que indique el encargo en cuanto lo confirmes, empezando por lo de más riesgo, y al final el veredicto. Si la sesión se corta por límite de uso, lo hecho no se pierde y el siguiente solo hace lo que falta.
+
+Tu resultado es el informe: queda completo, en el formato de arriba, en la bitácora, y como resultado de la tarea de Orca (tu mensaje de terminado) entregas el veredicto y los hallazgos en pocas líneas. Si te bloqueas o necesitas una decisión, pregunta al coordinador por la orquestación; tú no hablas con el usuario.

@@ -82,18 +82,18 @@ Según el modo de equipo: en el **completo**, los cuatro; en el **mínimo**, nin
 
 | Papel | Cuándo |
 |---|---|
-| `qa` | Siempre |
-| `reviewer` | Siempre |
-| `security` | Si toca autenticación, sesiones, permisos, datos personales, pagos, secretos o configuración, dependencias nuevas, subida de archivos, servicios externos, o entradas de usuario nuevas que llegan a base de datos, HTML, shell o archivos. En caso de duda, lánzalo |
-| `bug_hunter` | Si hay reglas de negocio con estados, cálculos (importes, fechas, zonas horarias), concurrencia o tareas asíncronas, integraciones externas, migraciones de datos o parseo de formatos |
+| `reviewer` | Siempre, de otro proveedor que el desarrollador si es posible |
+| `qa` | Si el proyecto no tiene `mise run calidad` en la CI; si la tiene, solo para la comprobación de los tests cuando no hay `mise run mutacion` |
+| `security` | Si toca autenticación, sesiones, permisos, datos personales, pagos, secretos o configuración, dependencias nuevas, subida de archivos, servicios externos, o entradas de usuario nuevas que llegan a base de datos, HTML, shell o archivos. En caso de duda, lánzalo, acotado a esos archivos |
+| `bug_hunter` | Si hay reglas de negocio con estados, cálculos (importes, fechas, zonas horarias), concurrencia o tareas asíncronas, integraciones externas, migraciones de datos o parseo de formatos; acotado a esos archivos |
 
 Di al usuario en una línea cuáles van y por qué los que no; si pide alguno más, añádelo.
 
-Lánzalos a la vez, cada uno en su worktree hijo (`--worktree new-child`). Encargo común, además de su papel:
+Lánzalos escalonados y repartidos entre proveedores («Auditoría proporcional» en `SKILL.md`), cada uno en su worktree hijo (`--worktree new-child`). Encargo común, además de su papel:
 
-> Rama `feat/NNN-nombre-corto`, comparada con `origin/main`. Especificación: `docs/specs/NNN-nombre-corto/spec.md`. Plan: `docs/specs/NNN-nombre-corto/plan.md`. Audita según tu papel y entrega el informe en su formato.
+> Rama `feat/NNN-nombre-corto`, comparada con `origin/main`. Especificación: `docs/specs/NNN-nombre-corto/spec.md`. Plan: `docs/specs/NNN-nombre-corto/plan.md`. Revisa, por este orden, solo: <archivos críticos del plan o lista de puntos>. Ya revisado (no lo repitas): <lo que haya>. Escribe tus hallazgos en la bitácora `<ruta>` según los confirmes y entrega el informe en su formato.
 
-Al de `qa` añádele la comprobación de los tests: qué romper (las tareas «sin rojo», cada amenaza del plan y las reglas críticas: permisos, importes, restricciones de datos, validaciones; entre 5 y 15 cambios; en modo ligero, solo las tareas «sin rojo»).
+La comprobación de los tests (rompen a propósito y se mira si algún test falla) la hace `mise run mutacion` si el proyecto la tiene; si no, encárgasela a quien audite: qué romper (las tareas «sin rojo», las amenazas del plan y las reglas críticas: permisos, importes, restricciones de datos, validaciones), entre 5 y 8 cambios; en modo ligero, solo las tareas «sin rojo».
 
 Consolida los informes: une duplicados, conserva el texto completo de cada hallazgo (con el test propuesto si lo hay) y clasifícalos por gravedad.
 

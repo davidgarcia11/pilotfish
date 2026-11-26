@@ -40,27 +40,28 @@ Si la corrección cambia el modelo de datos, contratos o varios módulos, sigue 
 
 Lanza el `developer` (`--worktree current`). Encargo, además de su papel:
 
-> Rama `fix/nombre-corto`, en este worktree. Bug: <síntoma, pasos y causa raíz con rutas>. Primero escribe un test que reproduzca el bug y confirma que falla. Después aplica la corrección mínima aprobada: <corrección>. `mise run check` y commit `fix(ámbito): ...`. Corrige también estos sitios con el mismo patrón: <lista o «ninguno»>.
+> Rama `fix/nombre-corto`, en este worktree. Bug: <síntoma, pasos y causa raíz con rutas>. Primero escribe un test que reproduzca el bug y confirma que falla. Después aplica la corrección mínima aprobada: <corrección>. Comprobaciones rápidas, commit `fix(ámbito): ...` y `mise run check` completo al terminar, con su resultado y commit en el informe. Corrige también estos sitios con el mismo patrón: <lista o «ninguno»>.
 
 Comprueba tú que el test existe y que su motivo de fallo en rojo coincide con el bug.
 
 ## 4. Auditorías y correcciones
 
-Según el modo de equipo de `SKILL.md`: en el **completo**, los cuatro; en el **mínimo**, ninguno (revisas tú, y compruebas que revertir la corrección hace fallar el test nuevo); en el **necesario**, según esta tabla. Lánzalos a la vez, cada uno en su worktree hijo (`--worktree new-child`):
+Según el modo de equipo de `SKILL.md`: en el **completo**, los cuatro; en el **mínimo**, ninguno (revisas tú, y compruebas que revertir la corrección hace fallar el test nuevo); en el **necesario**, según esta tabla. Lánzalos escalonados y acotados a los archivos de la corrección («Auditoría proporcional» en `SKILL.md`), cada uno en su worktree hijo (`--worktree new-child`):
 
 | Papel | Cuándo |
 |---|---|
-| `qa` | Siempre; con la comprobación de los tests sobre la corrección (revertirla debe hacer fallar el test nuevo) |
+| `reviewer` | Siempre, de otro proveedor que el desarrollador si es posible; incluye comprobar que revertir la corrección hace fallar el test nuevo |
+| `qa` | Solo si el proyecto no tiene `mise run calidad` en la CI |
 | `security` | Si el bug o la corrección tocan permisos, autenticación, entradas o datos personales |
-| `reviewer` | Si la corrección supera unas 50 líneas o toca varios módulos |
 | `bug_hunter` | Si el tipo de bug sugiere hermanos (límites, concurrencia, formatos) |
 
 Encargo: rama, descripción del bug, causa raíz y corrección. Mismas reglas de gravedad, correcciones y rondas que en `flujos/funcionalidad.md`.
 
 ## 5. PR
 
+Comprueba que el último `mise run check` del informe corresponde a `HEAD` (si no, pide o ejecuta uno solo) y empuja; la CI de la PR es la comprobación final:
+
 ```bash
-mise run check
 git push -u origin fix/nombre-corto
 ```
 
