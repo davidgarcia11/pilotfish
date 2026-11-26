@@ -104,6 +104,7 @@ comprueba "permite en main un comando compuesto sin commit" "entrada_hook 'git s
 comprueba "permite en main la palabra commit como argumento" "entrada_hook 'git log --grep commit' | bash .claude/hooks/no-commit-main.sh"
 comprueba "bloquea en main un commit dentro de un comando compuesto" "! entrada_hook 'cd sub && git commit -m x' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
 comprueba "bloquea en main un commit con git -C" "! entrada_hook 'git -C . commit -m x' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
+comprueba "bloquea en main un commit dentro de bash -c" "! entrada_hook 'bash -c \\\"git commit -m x\\\"' | bash .claude/hooks/no-commit-main.sh 2>/dev/null"
 git switch -q -c feat/prueba
 comprueba "permite commits en una rama" "echo '{\"cwd\":\"$repo\"}' | bash .claude/hooks/no-commit-main.sh"
 

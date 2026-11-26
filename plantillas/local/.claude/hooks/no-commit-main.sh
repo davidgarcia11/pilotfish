@@ -8,7 +8,8 @@
 
 # ¿Alguna parte del comando ejecuta el subcomando `commit` de git? Salta las opciones
 # globales (`-C <ruta>`, `-c <clave=valor>`, `--no-pager`…) hasta el primer argumento,
-# que es el subcomando. `git log --grep commit` no cuenta.
+# que es el subcomando. `git log --grep commit` no cuenta. Las comillas se quitan antes
+# de partir el comando, para ver también `bash -c "git commit …"`.
 es_commit() {
   local segmento i j subcomando
   local -a palabras
@@ -26,7 +27,7 @@ es_commit() {
       done
       [[ $subcomando == commit ]] && return 0
     done
-  done < <(printf '%s\n' "$1" | sed -E 's/(&&|\|\||[;|&])/\n/g')
+  done < <(printf '%s\n' "$1" | tr -d "\"'" | sed -E 's/(&&|\|\||[;|&()])/\n/g')
   return 1
 }
 
