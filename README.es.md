@@ -31,7 +31,7 @@ Pilotfish da a tus agentes un **proceso**, una **estructura de equipo** y **prot
 | | |
 |---|---|
 | 📝 **Especificación primero** | No se programa nada hasta que apruebas una especificación y un plan con casos límite y amenazas. |
-| 🧪 **Tests primero, comprobados** | Cada tarea lleva un test que se vio fallar antes de implementar. Después, QA rompe a propósito el código crítico para demostrar que los tests lo detectan. |
+| 🧪 **Tests primero, comprobados** | Cada tarea lleva un test que se vio fallar antes de implementar. Después, la mutación (o un auditor, si el proyecto no la tiene) rompe a propósito el código crítico para demostrar que los tests lo detectan. |
 | 👥 **Un equipo de verdad** | Coordinador, desarrollador, QA, revisor, cazabugs y auditor de seguridad, cada uno con sus instrucciones. |
 | 🎛️ **Tus modelos** | Eliges el modelo de cada papel en un archivo de configuración. Combina Claude, Codex, DeepSeek, GLM o cualquier agente que Orca pueda lanzar. |
 | 🔁 **Reservas automáticas** | ¿Un modelo sin uso? El papel pasa al siguiente de su lista, o se pausa si prefieres no bajar de nivel. |
@@ -51,11 +51,11 @@ flowchart TD
     D --> E{✅ Apruebas}
     E -->|sí| F[⌨️ Desarrollo con tests primero<br/><sub>trabajador desarrollador · en la rama</sub>]
     F --> G
-    subgraph G [🔍 Auditorías en paralelo, cada una en su worktree]
-        G1[QA + comprobación de los tests]
-        G2[Revisor]
-        G3[Cazabugs · si hay lógica delicada]
-        G4[Seguridad · si toca datos o accesos]
+    subgraph G [🔍 Auditorías según el riesgo, cada una en su worktree]
+        G1[CI: check, calidad y mutación · sin IA]
+        G2[Revisor · de otro proveedor]
+        G3[Cazabugs · si hay lógica delicada, acotado]
+        G4[Seguridad · si toca datos o accesos, acotado]
     end
     G --> H{¿Hallazgos graves?}
     H -->|sí, máx. 2 rondas| F
@@ -65,7 +65,7 @@ flowchart TD
 
 - **El coordinador** es el agente con el que hablas en una tarea de Orca. Escribe la especificación y el plan, reparte el trabajo con la orquestación de Orca y comprueba cada resultado con evidencias.
 - **Los trabajadores** son agentes que Orca lanza con el modelo que elige tu configuración. Cada encargo lleva las instrucciones completas del papel, así que cualquier proveedor puede hacer cualquier papel.
-- **Las auditorías van según el riesgo:** QA y revisor, siempre; cazabugs y seguridad, solo cuando el cambio lo pide.
+- **Las auditorías van según el riesgo:** lo que se puede comprobar con un comando lo comprueban el hook, el check y la CI, una sola vez; la IA se reserva para el juicio: un revisor de otro proveedor siempre, y cazabugs y seguridad solo cuando el cambio lo pide, acotados a los archivos críticos.
 
 ## 🚀 Empezar
 
@@ -177,14 +177,14 @@ Al empezar cada flujo, el coordinador te pregunta cuántos auditores quieres y t
 | Modo | Auditores |
 |---|---|
 | **Completo** | QA, revisor, cazabugs y seguridad, siempre |
-| **Necesario** | QA y revisor; cazabugs y seguridad cuando el cambio lo pide |
-| **Mínimo** | Ninguno: el coordinador revisa él mismo el diff y pasa las comprobaciones |
+| **Necesario** | Revisor de otro proveedor; cazabugs y seguridad cuando el cambio lo pide, acotados a los archivos críticos; QA solo si la CI no tiene `mise run calidad` |
+| **Mínimo** | Ninguno: el coordinador revisa él mismo el diff con la evidencia del check y la CI |
 
 Puedes añadir o quitar un auditor en cualquier momento («pasa el cazabugs por esto», «sin revisión de seguridad esta vez»). Para que no pregunte, pon un modo por defecto con `team_mode` en `[rules]` de tu configuración: `"full"`, `"necessary"` o `"minimal"` (por defecto es `"ask"`). Los hooks, el CI, la base de tests separada y tu merge se aplican en todos los modos.
 
 ## 🔁 Reservas y relevo
 
-- **Trabajadores:** si uno se para porque su modelo ha llegado a un límite de uso, el coordinador vuelve a calcular el equipo sin él (`pilotfish agents --without claude`) y relanza el mismo encargo con el siguiente modelo.
+- **Trabajadores:** si uno se para porque su modelo ha llegado a un límite de uso, el coordinador vuelve a calcular el equipo sin él (`pilotfish agents --without claude`, repetible) y relanza solo lo que falta con el siguiente modelo: los trabajadores escriben su avance en la bitácora de la funcionalidad según trabajan, así que un corte no tira lo hecho.
 - **Coordinador:** un modelo sin uso no puede pasarle nada a nadie, así que todo queda escrito sobre la marcha: especificación, plan y tareas en el repositorio, las ejecuciones en la orquestación de Orca y una línea de estado en el worktree. Abre otro agente en la misma tarea, di **«continúa»** y seguirá desde ese punto.
 
 ## 🧩 Configuración de Orca por proyecto
