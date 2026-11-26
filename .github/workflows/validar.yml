@@ -19,7 +19,7 @@ jobs:
           python-version: "3.13"
       - name: Shellcheck
         run: |
-          shellcheck -s bash bin/pilotfish plantillas/comun/scripts/*.sh plantillas/servicios/scripts/*.sh plantillas/local/.claude/hooks/*.sh tests/*.sh
+          shellcheck -s bash bin/pilotfish plantillas/comun/scripts/*.sh plantillas/servicios/scripts/*.sh tests/*.sh
           shellcheck -s sh plantillas/comun/.githooks/*
       - name: Default config
         run: python3 -I lib/team.py --root . > /dev/null

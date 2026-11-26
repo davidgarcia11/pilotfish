@@ -3,6 +3,8 @@
 - **Especificación:** [spec.md](spec.md)
 - **Estado:** Borrador
 
+<!-- Corto por defecto: lo necesario para no equivocarse. Borra las secciones que no apliquen. -->
+
 ## Enfoque
 
 <!-- La solución en 3-6 frases y por qué es la mínima que cumple la especificación. -->
@@ -29,17 +31,26 @@
 
 ## Errores y casos límite
 
-| Situación | Comportamiento | Prueba |
-|---|---|---|
-| | | |
+<!-- Solo los que pueden costar dinero, datos, seguridad o disponibilidad. Entre esta tabla y la de amenazas, unas 12 filas como máximo. -->
+
+| Id | Situación | Comportamiento | Prueba |
+|---|---|---|---|
+| E1 | | | |
 
 ## Seguridad y privacidad
 
 <!-- Quién puede hacer qué, validación de entradas, datos personales, secretos. -->
 
-| Amenaza | Mitigación | Prueba |
-|---|---|---|
-| | | |
+| Id | Amenaza | Mitigación | Prueba |
+|---|---|---|---|
+| A1 | | | |
+
+## Archivos críticos y auditoría
+
+<!-- Archivos de dinero, permisos, secretos, tareas periódicas o servicios externos: los recibe la auditoría especializada y la mutación. Qué auditoría pide el cambio (tabla «Auditoría proporcional» de SKILL.md). -->
+
+- Archivos críticos:
+- Auditoría:
 
 ## Documentación que cambia
 
@@ -55,12 +66,6 @@
 
 -
 
-## Alternativas descartadas
-
-| Alternativa | Motivo |
-|---|---|
-| | |
-
 ## Decisión de arquitectura
 
-<!-- "No requiere ADR" o enlace al ADR nuevo en docs/adr/. -->
+<!-- "No requiere ADR" o enlace al ADR nuevo en docs/adr/ (las alternativas descartadas van en el ADR). -->

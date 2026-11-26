@@ -3,7 +3,7 @@
 #
 #   pilotfish install            install the skill for this machine's agents and the pilotfish command
 #   pilotfish update             pull the latest version and reinstall
-#   pilotfish agents [--json] [--without claude,...] [--preset NAME]
+#   pilotfish agents [--json] [--without claude,... (repeatable)] [--preset NAME]
 #                                which model plays each role with what is available now (or with a preset)
 #   pilotfish detect [--json]    every model usable on this machine
 #   pilotfish config [--template] in a project: assistant to choose its team; elsewhere or with --template: create your settings
@@ -194,7 +194,7 @@ scaffold() {
   [ "$services" -eq 1 ] && copy_tree "$templates/servicios"
   [ "$runbook" -eq 1 ] && copy_tree "$templates/opcional/runbook"
 
-  chmod +x .githooks/* scripts/*.sh .claude/hooks/*.sh 2>/dev/null || true
+  chmod +x .githooks/* scripts/*.sh 2>/dev/null || true
   git config core.hooksPath .githooks
 
   add_lines() {

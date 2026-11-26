@@ -362,8 +362,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", required=True)
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--without", default=os.environ.get("PILOTFISH_WITHOUT", ""),
-                        help="agents, providers or models out of usage, comma-separated (e.g. claude)")
+    parser.add_argument("--without", action="append", default=[],
+                        help="agents, providers or models out of usage, comma-separated or repeated "
+                             "(e.g. --without claude,deepseek or --without claude --without deepseek)")
     parser.add_argument("--detect", action="store_true", help="list every model usable on this machine")
     parser.add_argument("--preset", help="preview a starting point, or apply it with --save")
     parser.add_argument("--save", action="store_true", help="write the changes to the project's .pilotfish.toml")
@@ -374,7 +375,8 @@ def main() -> int:
     args = parser.parse_args()
     root = Path(args.root)
     config, paths = load(root)
-    without = {w.strip() for w in args.without.split(",") if w.strip()}
+    exclusions = [os.environ.get("PILOTFISH_WITHOUT", ""), *args.without]
+    without = {w.strip() for value in exclusions for w in value.split(",") if w.strip()}
 
     if args.detect:
         found = detect(config)

@@ -85,7 +85,7 @@ Estas reglas valen para cualquier agente que trabaje en el proyecto. Archivo loc
 
 1. Rama desde `main`: `feat/NNN-nombre`, `fix/nombre`, `chore/` o `docs/`.
 2. Commits pequeños en conventional commits, en español.
-3. `mise run check` en verde antes de cada commit.
+3. Antes de cada commit: formato, lint, tipos y los tests relacionados. `mise run check` completo al cerrar cada bloque de trabajo y antes de cada push; la CI lo repite en la PR.
 4. `git push -u`, luego PR/MR con la plantilla del repositorio. El merge lo hace el usuario.
 
 ## Alcance actual

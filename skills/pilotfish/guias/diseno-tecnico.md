@@ -24,8 +24,8 @@ Planificas como arquitecto de software senior en el stack del proyecto: pragmát
    - Estados: qué operaciones valen en cada estado y cuáles no; cambios que deben invalidar sesiones, cachés o enlaces.
    - Fechas, zonas horarias, importes y redondeos si aparecen.
    - Dependencia externa caída o lenta.
-   Escribe cada caso relevante en la tabla del plan con su comportamiento y su prueba.
-7. **Amenazas.** Por cada punto de entrada nuevo, piensa como un atacante y escribe en la tabla del plan amenaza, mitigación y prueba:
+   Al plan solo van los casos que pueden costar dinero, datos, seguridad o disponibilidad, cada uno con identificador (`E1`, `E2`…), comportamiento y prueba. Los evidentes (entrada vacía, formato, límite de longitud) los cubre el desarrollador con sus tests sin listarlos: una tabla larga se paga en cada lectura del plan y en un test por fila.
+7. **Amenazas.** Por cada punto de entrada nuevo, piensa como un atacante y escribe en la tabla del plan amenaza, mitigación y prueba, con identificador (`A1`, `A2`…). Entre esta tabla y la de casos límite, unas 12 filas como máximo; si salen muchas más, la funcionalidad probablemente es demasiado grande:
    - ¿Puedo actuar sobre datos de otro usuario cambiando un ID? (autorización en servidor, a nivel de objeto).
    - ¿Hay un camino que se salte un paso obligatorio (verificación, 2FA, confirmación)?
    - ¿La respuesta, sus errores o su tiempo revelan si algo existe?
@@ -34,9 +34,14 @@ Planificas como arquitecto de software senior en el stack del proyecto: pragmát
    Datos personales: cuáles, por qué, cuánto tiempo. Nada de secretos en cliente ni en logs.
 8. **Datos de referencia.** Si la funcionalidad usa listas oficiales (divisas, países, impuestos, zonas horarias…), el plan indica la fuente: estándar del lenguaje, librería mantenida o la URL oficial. Nunca de memoria.
 9. **Documentación.** Qué documentos cambian: README, `ARCHITECTURE.md`, ADR, `RUNBOOK.md`, referencia OpenAPI. Inclúyelos en las tareas que los provocan, no en una tarea final aparte.
-10. **Pruebas.** Cada criterio de aceptación con su nivel de prueba: unitaria para lógica de dominio, integración para endpoints y datos, extremo a extremo solo para flujos críticos.
-11. **Tareas.** Ver más abajo.
-12. **Decisión de arquitectura.** Si el plan cambia un principio, añade una dependencia relevante, un servicio o un patrón nuevo para el proyecto, redacta un ADR en `docs/adr/NNNN-titulo.md` con contexto, decisión, alternativas y consecuencias.
+10. **Pruebas.** Cada criterio de aceptación con su nivel de prueba: unitaria para lógica de dominio, integración para endpoints y datos, extremo a extremo solo para flujos críticos. Pide el patrón que toque, porque encuentra errores que una auditoría con IA cuesta mucho más encontrar:
+    - **propiedades** (fast-check, Hypothesis…) para importes, fechas y redondeos;
+    - **simulación de varios días o ejecuciones** para tareas periódicas y colas (¿todos acaban teniendo turno? ¿un fallo bloquea al resto?);
+    - **oráculo independiente** para cálculos;
+    - **pruebas de estructura** para las invariantes del proyecto.
+11. **Archivos críticos y auditoría.** Señala los archivos críticos (dinero, permisos, secretos, tareas periódicas, servicios externos): son los únicos que recibe la auditoría especializada y, si el proyecto la tiene, la mutación (`mise run mutacion`). Indica qué auditoría pide el cambio según la tabla de «Auditoría proporcional» de `SKILL.md`.
+12. **Tareas.** Ver más abajo.
+13. **Decisión de arquitectura.** Si el plan cambia un principio, añade una dependencia relevante, un servicio o un patrón nuevo para el proyecto, redacta un ADR en `docs/adr/NNNN-titulo.md` con contexto, decisión, alternativas y consecuencias.
 
 ## Reglas de diseño
 
@@ -53,14 +58,17 @@ Planificas como arquitecto de software senior en el stack del proyecto: pragmát
 - Rebanadas verticales: cada tarea deja el sistema funcionando y aporta algo comprobable.
 - Tamaño: un commit revisable, del orden de media jornada como máximo.
 - Orden: migraciones y contratos primero, después lógica, después interfaz.
-- Cada tarea indica archivos, la prueba que la demuestra, los casos límite y amenazas del plan que le tocan (cada uno con su test), los criterios que cubre y de qué depende.
+- Cada tarea indica archivos, la prueba que la demuestra, los identificadores de los casos límite y amenazas que le tocan (`E2`, `A1`: se enlazan, no se copian), los criterios que cubre y de qué depende.
 - Todos los criterios de aceptación quedan cubiertos por al menos una tarea.
+- **Tamaño de la funcionalidad.** Si salen más de unas 8 tareas, más de una integración externa nueva o un diff previsto de más de unas 1 500 líneas, para y propón al usuario dividir la especificación en partes que se puedan usar y probar por separado. Todo lo que viene después (desarrollo, auditorías, correcciones) cuesta en proporción al tamaño del diff. Ejemplo: «precio manual y valor actual», «precios automáticos» y «conversión de divisas» son tres funcionalidades, no una.
 
 ## Salida
 
 Escribe `plan.md` y `tasks.md` desde `plantillas/plan.md` y `plantillas/tasks.md` de esta skill, en la carpeta de la especificación, y el ADR si hace falta. Solo documentación: nada de código ni tests en esta fase.
 
 El plan debe bastar por sí solo: el desarrollador trabaja únicamente con `spec.md`, `plan.md` y `tasks.md`. Las decisiones tomadas en la conversación que afecten a la implementación quedan escritas.
+
+**Corto por defecto.** Cada trabajador relee el plan entero en cada encargo: escribe lo que hace falta para no equivocarse y nada más. Sin repetir la especificación, sin repetir en `tasks.md` lo que dice el plan, sin secciones vacías (bórralas). Los datos de proveedores externos, con su fuente y fecha, en una tabla breve.
 
 Presenta al usuario:
 

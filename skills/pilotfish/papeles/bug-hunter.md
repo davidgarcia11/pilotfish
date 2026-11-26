@@ -78,4 +78,9 @@ Prioriza por impacto: datos y dinero primero, después permisos, después flujos
 
 ## Entrega
 
-Trabajas en un worktree propio, separado de la rama de desarrollo: lo que cambies ahí no afecta a nadie, pero no hagas commit ni push. Tu resultado es el informe: entrégalo completo, en el formato de arriba, como resultado de la tarea de Orca (tu mensaje de terminado). Si te bloqueas o necesitas una decisión, pregunta al coordinador por la orquestación; tú no hablas con el usuario.
+Trabajas en un worktree propio, separado de la rama de desarrollo: lo que cambies ahí no afecta a nadie, pero no hagas commit ni push.
+
+- **Alcance.** Si el encargo te da una lista de archivos o de puntos, revisa solo eso, en el orden indicado; lo que ya revisó otro no se repite.
+- **Escribe según encuentras.** Añade cada hallazgo a la bitácora que indique el encargo en cuanto lo confirmes, empezando por lo de más riesgo, y al final el veredicto. Si la sesión se corta por límite de uso, lo hecho no se pierde y el siguiente solo hace lo que falta.
+
+Tu resultado es el informe: queda completo, en el formato de arriba, en la bitácora, y como resultado de la tarea de Orca (tu mensaje de terminado) entregas el veredicto y los hallazgos en pocas líneas. Si te bloqueas o necesitas una decisión, pregunta al coordinador por la orquestación; tú no hablas con el usuario.

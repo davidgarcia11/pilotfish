@@ -42,12 +42,29 @@ Cuántos auditores trabajan en el flujo. Lo eliges con el usuario al empezar, de
 | Modo | Auditores |
 |---|---|
 | **Completo** (`full`) | QA, revisor, cazabugs y seguridad, siempre |
-| **Necesario** (`necessary`) | QA y revisor; cazabugs y seguridad cuando el cambio lo pide (criterios de cada flujo) |
-| **Mínimo** (`minimal`) | Ninguno. Revisas tú el diff con la lista de `papeles/reviewer.md`, compruebas que cada criterio de aceptación tiene su test y pasas `mise run check`. En la PR lo indicas como «revisión del coordinador» |
+| **Necesario** (`necessary`) | Revisor de otro proveedor que el desarrollador; cazabugs y seguridad cuando el cambio lo pide, acotados a los archivos críticos del plan; QA con IA solo para lo que la CI no comprueba (ver «Auditoría proporcional») |
+| **Mínimo** (`minimal`) | Ninguno. Revisas tú el diff con la lista de `papeles/reviewer.md`, compruebas que cada criterio de aceptación tiene su test y que el `mise run check` del último commit está en verde. En la PR lo indicas como «revisión del coordinador» |
 
 - Lee `team_mode` de `pilotfish agents --json`. Si es `ask`, pregunta al usuario qué modo quiere, con preguntas de opciones si tu herramienta las tiene. En cada opción, di qué papeles trabajarían y con qué modelo, y cuáles añadirían los criterios de riesgo en este cambio. Si es otro valor, úsalo y díselo en una línea.
 - **A la carta:** el usuario puede añadir o quitar un auditor en cualquier momento («pasa el cazabugs», «sin seguridad en esta», «que revise Codex»). Aplícalo solo a ese flujo.
 - En todos los modos siguen igual los hooks, el CI, la base de tests separada y el merge del usuario.
+
+### Auditoría proporcional
+
+Lo determinista lo comprueban el hook, el check y la CI (y `mise run calidad` si el proyecto la tiene): ningún auditor lo repite. La IA se reserva para el juicio, y en proporción al riesgo:
+
+| Cambio | Auditoría |
+|---|---|
+| Dependencias, textos, estilos, documentación, arreglo de una línea, sin ningún disparador de abajo | Modo mínimo: tú, con la evidencia del check y la CI |
+| Funcionalidad sin dinero, permisos ni red | Revisor de otro proveedor |
+| Con dinero, fechas, concurrencia, tareas periódicas, colas o servicios externos | + cazabugs acotado a los archivos de cálculo o de la tarea |
+| Con autenticación, permisos, secretos o datos personales | + seguridad acotada a esos archivos |
+| Proyecto sin `mise run calidad` en la CI | + QA (lo que la CI no cubre) |
+
+- **Acotado** (especialistas) quiere decir que el encargo lleva la lista de archivos críticos del plan y un orden de prioridad, nunca el diff entero. El revisor, en cambio, cubre todo el diff: así nada llega a la PR sin que alguien lo haya leído.
+- La tabla concreta el modo elegido, no lo sustituye: en `full` van todos, y un disparador de riesgo manda sobre el tamaño (un arreglo de una línea en permisos lleva seguridad).
+- **Escalonado y repartido.** Lanza primero al revisor; si los especialistas van a la vez, que no sean todos del mismo proveedor que acaba de gastar cupo el desarrollador. Un corte de cupo no debe tumbar a todos a la vez.
+- En funcionalidades largas, el revisor puede mirar cada bloque al terminarlo (diffs pequeños) en vez de todo al final.
 
 ## Al empezar un flujo: poner al día
 
@@ -124,9 +141,13 @@ Usa la orquestación de Orca (comando `orca`). Antes del primer encargo del fluj
    - `developer`: `--worktree current` (trabaja en la rama de la funcionalidad).
    - `qa`, `reviewer`, `bug_hunter` y `security`: `--worktree new-child` (un worktree propio a partir de la rama; aunque toquen algo, no afecta a la rama). Antes de dar por bueno su informe, comprueba que el commit evaluado es el último de la rama.
 4. Espera los resultados con `orca orchestration check --wait` y un tiempo de espera largo (unos 15 minutos), sin consultar en bucle: cada consulta te cuesta uso. No termines tu turno mientras haya trabajadores sin informe: si lo terminas, nadie te despierta cuando lleguen. Si vence la espera, vuelve a esperar. Que no haya mensajes no significa que el trabajador esté parado: un desarrollador puede pasar muchos minutos leyendo y probando sin escribir nada.
-5. Lee el informe completo (`worker-read`), libera el trabajador (`worker-release`) y, si era un worktree hijo, borra sus bases (`scripts/entorno-worktree.sh --borrar` dentro de él, si el proyecto lo tiene) y el worktree (`orca worktree rm`).
+5. Lee el informe completo (`worker-read` o la bitácora), libera el trabajador (`worker-release`; el desarrollador no: sigue abierto hasta abrir la PR, para reutilizarlo) y, si era un worktree hijo, borra sus bases (`scripts/entorno-worktree.sh --borrar` dentro de él, si el proyecto lo tiene) y el worktree (`orca worktree rm`).
 
 Nunca hay dos trabajadores tocando el mismo worktree a la vez. Mientras el desarrollador trabaja, tú tampoco cambias código ni ejecutas pruebas en ese worktree.
+
+**Un desarrollador por funcionalidad.** Lanza al `developer` una sola vez (con `--keep-open`) y mándale los bloques siguientes y las correcciones con `orca orchestration send --to dispatch:<id>`: conserva lo que ya leyó y no paga otro arranque en frío releyendo especificación, plan e informes. Solo lanzas uno nuevo si el anterior murió o se quedó sin uso.
+
+**Bitácora de la funcionalidad.** Todos los trabajadores escriben su informe, una sección por encargo, en `$(git rev-parse --path-format=absolute --git-common-dir)/pilotfish/NNN-nombre/bitacora.md`: dentro de `.git`, así que queda fuera del historial, la comparten todos los worktrees y no se borra al reiniciar. El encargo indica la ruta y pide leer solo las secciones que hagan falta, no la bitácora entera.
 
 **Antes de dar por fallido a un trabajador** necesitas una prueba, no una sospecha: que la orquestación diga que ha terminado o fallado, o que su terminal muestre que el agente ha salido o que espera una respuesta que nunca llegará (un aviso de permisos, un error). Mira su estado y su terminal antes de decidir. Si sigue trabajando, espera. Si hay que sustituirlo, primero detenlo y libéralo (`worker-release`), confirma que ya no está activo y revisa `git status` del worktree: si dejó cambios a medias, decide con el usuario si se conservan o se descartan. Solo entonces lanzas al siguiente.
 
@@ -136,8 +157,8 @@ Nunca hay dos trabajadores tocando el mismo worktree a la vez. Mientras el desar
 
 Si un trabajador ha terminado de verdad (ver «Antes de dar por fallido a un trabajador») sin informe, o su salida dice que ha llegado a un límite de uso, de cuota o que no tiene sesión:
 
-1. Vuelve a resolver los papeles excluyéndolo: `pilotfish agents --json --without <agente>`.
-2. Relanza el mismo encargo con el nuevo modelo y díselo al usuario en una línea.
+1. Vuelve a resolver los papeles excluyéndolo: `pilotfish agents --json --without <agente>` (se puede repetir `--without` o separar con comas).
+2. Lee lo que el trabajador dejó en la bitácora y relanza solo lo que falta, con el nuevo modelo; díselo al usuario en una línea.
 3. Si el papel queda en `paused`, para y avisa al usuario de qué falta y cuándo podrá seguir.
 
 ## Estado visible y relevo

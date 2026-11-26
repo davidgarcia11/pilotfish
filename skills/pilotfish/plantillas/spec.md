@@ -18,7 +18,7 @@
 
 ## Criterios de aceptación
 
-Cada criterio es verificable y tendrá al menos un test.
+Cada criterio es verificable y tendrá al menos un test cuyo nombre empieza por su identificador (`CA-1 …`): así la trazabilidad criterio → test se comprueba con un comando, sin revisión manual.
 
 - **CA-1** (HU-1). Dado <contexto>, cuando <acción>, entonces <resultado observable>.
 - **CA-2** (HU-1). Dado <entrada inválida>, cuando <acción>, entonces <error comprensible y sin efectos>.

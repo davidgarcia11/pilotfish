@@ -31,7 +31,7 @@ Pilotfish gives your agents a **process**, a **team structure**, and **guardrail
 | | |
 |---|---|
 | 📝 **Spec-driven** | Nothing gets coded until you approve a specification and a plan with edge cases and threats. |
-| 🧪 **Test-first, verified** | Every task ships with a test that was seen failing first. QA then breaks critical code on purpose to prove the tests catch it. |
+| 🧪 **Test-first, verified** | Every task ships with a test that was seen failing first. Mutation testing (or an auditor, when the project has none) then breaks critical code on purpose to prove the tests catch it. |
 | 👥 **A real team** | Coordinator, developer, QA, reviewer, bug hunter and security auditor — each with its own playbook. |
 | 🎛️ **Bring your own models** | Choose the model for each role in one config file. Mix Claude, Codex, DeepSeek, GLM or anything Orca can launch. |
 | 🔁 **Automatic fallbacks** | A model out of usage? The role moves to the next one in its list — or pauses, if you'd rather not downgrade. |
@@ -51,11 +51,11 @@ flowchart TD
     D --> E{✅ You approve}
     E -->|yes| F[⌨️ Test-first development<br/><sub>developer worker · on the branch</sub>]
     F --> G
-    subgraph G [🔍 Parallel audits, each in its own worktree]
-        G1[QA + test verification]
-        G2[Reviewer]
-        G3[Bug hunter · when logic is tricky]
-        G4[Security · when data or access is involved]
+    subgraph G [🔍 Audits by risk, each in its own worktree]
+        G1[CI: check, quality gate and mutation · no AI]
+        G2[Reviewer · another provider]
+        G3[Bug hunter · when logic is tricky, scoped]
+        G4[Security · when data or access is involved, scoped]
     end
     G --> H{Blocking findings?}
     H -->|yes, max 2 rounds| F
@@ -65,7 +65,7 @@ flowchart TD
 
 - **The coordinator** is the agent you talk to in an Orca task. It writes the spec and the plan, dispatches work through Orca's orchestration, and checks every result against evidence.
 - **Workers** are agents Orca launches with the model your config picks. Each brief carries the role's full playbook, so any provider can play any role.
-- **Audits run by risk:** QA and the reviewer always; the bug hunter and the security auditor only when the change calls for them.
+- **Audits run by risk:** whatever a command can check is checked once by the hook, the check and CI; AI is kept for judgement: a reviewer from another provider always, and the bug hunter and the security auditor only when the change calls for them, scoped to the critical files.
 
 ## 🚀 Quick start
 
@@ -177,14 +177,14 @@ At the start of every workflow the coordinator asks how many auditors you want, 
 | Mode | Auditors |
 |---|---|
 | **Full** | QA, reviewer, bug hunter and security, always |
-| **Necessary** | QA and reviewer; bug hunter and security when the change calls for them |
-| **Minimal** | None: the coordinator reviews the diff itself and runs the checks |
+| **Necessary** | Reviewer from another provider; bug hunter and security when the change calls for them, scoped to the critical files; QA only if CI lacks `mise run calidad` |
+| **Minimal** | None: the coordinator reviews the diff itself using the check and CI evidence |
 
 Add or drop an auditor at any moment ("run the bug hunter on this", "no security review this time"). To skip the question, set a default with `team_mode` under `[rules]` in your config: `"full"`, `"necessary"` or `"minimal"` (`"ask"` is the default). Hooks, CI, the separate test database and your merge apply in every mode.
 
 ## 🔁 Fallbacks and handoff
 
-- **Workers:** if a worker stops because its model hit a usage limit, the coordinator re-resolves the team without it (`pilotfish agents --without claude`) and relaunches the same brief on the next model.
+- **Workers:** if a worker stops because its model hit a usage limit, the coordinator re-resolves the team without it (`pilotfish agents --without claude`, repeatable) and relaunches only what is left on the next model: workers write their progress to the feature log as they go, so a cut loses nothing.
 - **Coordinator:** a model that is out of usage can't hand anything off, so everything is written down as it happens: spec, plan and tasks in the repo, runs in Orca's orchestration, and a status line on the worktree. Open another agent in the same task, say **"continue"**, and it resumes from that point.
 
 ## 🧩 Per-project setup in Orca
@@ -200,7 +200,7 @@ Per project you only create the `.env` with your secrets and add the project in 
 
 ```text
 my-project/
-├── .githooks/          secrets, commit format, AI attribution          ┐
+├── .githooks/          main-branch commits, secrets, format, AI credit ┐
 ├── .github/            CI (check + commit verification), PR template   │
 ├── scripts/            comprobar-commits.sh, entorno-worktree.sh       │ committed
 ├── docs/               architecture, ADRs, specs, runbook              │
@@ -208,7 +208,7 @@ my-project/
 ├── orca.yaml           worktree setup and archive scripts for Orca     ┘
 ├── AGENTS.md           project rules for any agent                     ┐
 ├── CLAUDE.md           @AGENTS.md                                      │ local only
-├── .claude/            permissions and a no-commit-on-main hook        │
+├── .claude/            agent permissions                               │
 └── .worktreeinclude    what Orca copies into each worktree             ┘
 ```
 

@@ -43,12 +43,12 @@ pilotfish agents --json
 1. Lee `AGENTS.md`, los principios de `docs/ARCHITECTURE.md` y el código relacionado lo justo para preguntar bien.
 2. Pregunta al usuario solo lo que no puedas deducir, en rondas de hasta 4 preguntas (con la herramienta de preguntas si la tienes).
 3. Redacta `docs/specs/NNN-nombre-corto/spec.md` desde `plantillas/spec.md`. Comportamiento observable, nunca implementación. Cada criterio verificable.
-4. **Tamaño.** Si pasa de unos 15 criterios de aceptación, propón dividirla en funcionalidades que se puedan probar de punta a punta por separado, con su orden, y especifica solo la primera.
+4. **Tamaño.** Propón dividirla en funcionalidades que se puedan usar y probar de punta a punta por separado, con su orden, y especifica solo la primera, si pasa de unos 15 criterios de aceptación, si trae más de una integración externa nueva o si prevés más de unas 8 tareas o un diff de más de unas 1 500 líneas. Es la decisión que más tokens ahorra: desarrollo, auditorías y correcciones cuestan en proporción al tamaño del diff.
 5. Enseña el objetivo, las historias, los criterios y lo que queda fuera. Itera hasta la aprobación explícita y marca `Estado: Aprobada`.
 
 ## 3. Plan
 
-Sigue `guias/diseno-tecnico.md`: `plan.md` (con la tabla de casos límite y la de amenazas, cada fila con su prueba), `tasks.md` y ADR si hace falta, desde `plantillas/plan.md` y `plantillas/tasks.md`. En modo ligero, `plan.md` breve.
+Sigue `guias/diseno-tecnico.md`: `plan.md` corto (solo los casos límite y amenazas que pueden costar dinero, datos, seguridad o disponibilidad, cada fila con su identificador y su prueba; archivos críticos y auditoría), `tasks.md` y ADR si hace falta, desde `plantillas/plan.md` y `plantillas/tasks.md`. En modo ligero, `plan.md` breve.
 
 Si surgen dudas sobre la especificación, pregúntalas y actualiza `spec.md` antes de seguir. Presenta el plan e itera hasta la aprobación explícita. Después:
 
@@ -60,11 +60,21 @@ Si `plan` y `coordinate` usan modelos distintos, sugiere ahora al usuario el cam
 
 ## 4. Desarrollo
 
-Lanza el `developer` (`--worktree current`) por bloques de hasta 5 tareas. Encargo, además de su papel:
+Lanza el `developer` (`--worktree current`, `--keep-open`) con el primer bloque de hasta 5 tareas y mándale los siguientes al mismo trabajador con `send` («Un desarrollador por funcionalidad» en `SKILL.md`). Encargo, además de su papel:
 
-> Rama `feat/NNN-nombre-corto`, en este worktree. Implementa las tareas T1-T5 de `docs/specs/NNN-nombre-corto/tasks.md` según `spec.md` y `plan.md`. Un commit por tarea con su test.
+> Rama `feat/NNN-nombre-corto`, en este worktree. Implementa las tareas T1-T5 de `docs/specs/NNN-nombre-corto/tasks.md` según `spec.md` y `plan.md`. Un commit por tarea con su test. Informe en la bitácora: `<ruta>`.
 
-Tras cada bloque comprueba tú: `git log --oneline origin/main..HEAD`, tareas marcadas en `tasks.md`, `mise run check` en verde y que el informe trae, por tarea, el motivo del fallo en rojo. Anota las tareas «sin rojo» para QA. Lleva al usuario los bloqueos de diseño y las desviaciones del plan que cambien configuración, dependencias o comportamiento; las demás, resúmelas al final del bloque.
+Tras cada bloque comprueba tú, sin repetir lo que ya se ejecutó: `git log --oneline origin/main..HEAD`, tareas marcadas en `tasks.md`, y que el informe trae, por tarea, el motivo del fallo en rojo, y el resultado de `mise run check` completo con el commit en que se ejecutó, que debe ser el último del bloque. Si falta o no corresponde, pídeselo al desarrollador; no lo ejecutes tú. Anota las tareas «sin rojo» para la comprobación de los tests. Lleva al usuario los bloqueos de diseño y las desviaciones del plan que cambien configuración, dependencias o comportamiento; las demás, resúmelas al final del bloque.
+
+**Cada comprobación, una sola vez y en su capa:**
+
+| Capa | Qué |
+|---|---|
+| Hooks de git | commits en `main` y secretos (`pre-commit`); formato del mensaje (`commit-msg`) |
+| Desarrollador, por tarea | formato, lint, tipos y **solo los tests relacionados** con lo cambiado |
+| Desarrollador, por bloque | `mise run check` completo, una vez |
+| Coordinador | revisa la evidencia; no repite el check |
+| CI de la PR | la autoridad: check, `mise run calidad` si existe y e2e |
 
 ## 5. Auditorías
 
@@ -72,18 +82,18 @@ Según el modo de equipo: en el **completo**, los cuatro; en el **mínimo**, nin
 
 | Papel | Cuándo |
 |---|---|
-| `qa` | Siempre |
-| `reviewer` | Siempre |
-| `security` | Si toca autenticación, sesiones, permisos, datos personales, pagos, secretos o configuración, dependencias nuevas, subida de archivos, servicios externos, o entradas de usuario nuevas que llegan a base de datos, HTML, shell o archivos. En caso de duda, lánzalo |
-| `bug_hunter` | Si hay reglas de negocio con estados, cálculos (importes, fechas, zonas horarias), concurrencia o tareas asíncronas, integraciones externas, migraciones de datos o parseo de formatos |
+| `reviewer` | Siempre, de otro proveedor que el desarrollador si es posible |
+| `qa` | Si el proyecto no tiene `mise run calidad` en la CI; si la tiene, solo para la comprobación de los tests cuando no hay `mise run mutacion` |
+| `security` | Si toca autenticación, sesiones, permisos, datos personales, pagos, secretos o configuración, dependencias nuevas, subida de archivos, servicios externos, o entradas de usuario nuevas que llegan a base de datos, HTML, shell o archivos. En caso de duda, lánzalo, acotado a esos archivos |
+| `bug_hunter` | Si hay reglas de negocio con estados, cálculos (importes, fechas, zonas horarias), concurrencia o tareas asíncronas, integraciones externas, migraciones de datos o parseo de formatos; acotado a esos archivos |
 
 Di al usuario en una línea cuáles van y por qué los que no; si pide alguno más, añádelo.
 
-Lánzalos a la vez, cada uno en su worktree hijo (`--worktree new-child`). Encargo común, además de su papel:
+Lánzalos escalonados y repartidos entre proveedores («Auditoría proporcional» en `SKILL.md`), cada uno en su worktree hijo (`--worktree new-child`). Encargo común, además de su papel:
 
-> Rama `feat/NNN-nombre-corto`, comparada con `origin/main`. Especificación: `docs/specs/NNN-nombre-corto/spec.md`. Plan: `docs/specs/NNN-nombre-corto/plan.md`. Audita según tu papel y entrega el informe en su formato.
+> Rama `feat/NNN-nombre-corto`, comparada con `origin/main`. Especificación: `docs/specs/NNN-nombre-corto/spec.md`. Plan: `docs/specs/NNN-nombre-corto/plan.md`. <Al `reviewer`: todo el diff (en funcionalidades largas, por bloques, sin repetir lo ya revisado). A los especialistas: revisa, por este orden, solo <archivos críticos del plan o lista de puntos>.> Ya revisado (no lo repitas): <lo que haya>. Escribe tus hallazgos en la bitácora `<ruta>` según los confirmes y entrega el informe en su formato.
 
-Al de `qa` añádele la comprobación de los tests: qué romper (las tareas «sin rojo», cada amenaza del plan y las reglas críticas: permisos, importes, restricciones de datos, validaciones; entre 5 y 15 cambios; en modo ligero, solo las tareas «sin rojo»).
+La comprobación de los tests (rompen a propósito y se mira si algún test falla) la hace `mise run mutacion` si el proyecto la tiene; si no, encárgasela a quien audite: qué romper (las tareas «sin rojo», las amenazas del plan y las reglas críticas: permisos, importes, restricciones de datos, validaciones), entre 5 y 8 cambios; en modo ligero, solo las tareas «sin rojo».
 
 Consolida los informes: une duplicados, conserva el texto completo de cada hallazgo (con el test propuesto si lo hay) y clasifícalos por gravedad.
 
@@ -93,12 +103,12 @@ Consolida los informes: une duplicados, conserva el texto completo de cada halla
 - MEDIO: se corrigen salvo que sean muchos o costosos; en ese caso pregunta al usuario cuáles aplazar.
 - BAJO: van a la PR como pendientes.
 
-Lanza el `developer` (`--worktree current`) con todos los hallazgos a corregir en un solo encargo, completos. Si discute un hallazgo, decide tú cuando sea evidente y pregunta al usuario cuando no.
+Manda al mismo `developer` (con `send`; uno nuevo solo si el anterior ya no está) todos los hallazgos a corregir en un solo encargo, completos. Si discute un hallazgo, decide tú cuando sea evidente y pregunta al usuario cuando no.
 
 Verificación:
 
 - Solo los CRÍTICO y ALTO hacen relanzar auditores: relanza solo los que los encontraron, indicándoles qué hallazgos deben verificar y que no repitan la auditoría entera.
-- Los MEDIO los verificas tú: el test nuevo existe, falla sin la corrección y `mise run check` está en verde.
+- Los MEDIO los verificas tú con la evidencia del informe: el test nuevo existe, el desarrollador lo vio fallar sin la corrección y su `mise run check` del último commit está en verde.
 
 Máximo 2 rondas. Si tras la segunda queda algún CRÍTICO o ALTO, para y presenta al usuario cada hallazgo con su coste estimado para que decida qué se corrige ya y qué va a pendientes.
 
@@ -111,8 +121,9 @@ Máximo 2 rondas. Si tras la segunda queda algún CRÍTICO o ALTO, para y presen
 
 ## 8. PR
 
+Comprueba que el último `mise run check` del informe corresponde a `HEAD` (si después hubo commits, aunque sean de documentación, pide o ejecuta uno solo) y empuja; la CI de la PR es la comprobación final:
+
 ```bash
-mise run check
 git push -u origin feat/NNN-nombre-corto
 ```
 
