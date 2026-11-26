@@ -46,7 +46,7 @@ Comprueba tú que el test existe y que su motivo de fallo en rojo coincide con e
 
 ## 4. Auditorías y correcciones
 
-Según el modo de equipo de `SKILL.md`: en el **completo**, los cuatro; en el **mínimo**, ninguno (revisas tú, y compruebas que revertir la corrección hace fallar el test nuevo); en el **necesario**, según esta tabla. Lánzalos escalonados y acotados a los archivos de la corrección («Auditoría proporcional» en `SKILL.md`), cada uno en su worktree hijo (`--worktree new-child`):
+Según el modo de equipo de `SKILL.md`: en el **completo**, los cuatro; en el **mínimo**, ninguno (revisas tú, y compruebas que revertir la corrección hace fallar el test nuevo); en el **necesario**, según esta tabla. Lánzalos escalonados («Auditoría proporcional» en `SKILL.md`), cada uno en su worktree hijo (`--worktree new-child`): el revisor lee todo el diff de la corrección; los especialistas, solo los archivos de la corrección que les tocan:
 
 | Papel | Cuándo |
 |---|---|
